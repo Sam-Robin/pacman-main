@@ -7,8 +7,6 @@ import pacman.game.comms.BasicMessage;
 import pacman.game.comms.BasicMessenger;
 import pacman.game.comms.Message;
 import pacman.game.comms.Messenger;
-
-import java.util.HashMap;
 import java.util.Random;
 
 public class POCommMyGhost extends IndividualGhostController {
