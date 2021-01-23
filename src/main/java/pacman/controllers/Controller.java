@@ -1,5 +1,6 @@
 package pacman.controllers;
 
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 /**
@@ -119,6 +120,8 @@ public abstract class Controller<T> implements Runnable {
      * @return The move to be played (i.e., the move calculated by your controller)
      */
     public abstract T getMove(Game game, long timeDue);
+
+    public abstract T getMove(NeuralNetwork network, Game game, long timeDue);
 
     /**
      * Gets the name of the controller

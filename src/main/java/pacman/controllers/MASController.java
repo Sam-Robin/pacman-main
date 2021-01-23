@@ -1,6 +1,7 @@
 package pacman.controllers;
 
 import com.fossgalaxy.object.annotations.ObjectDefStatic;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
@@ -49,6 +50,11 @@ public class MASController extends Controller<EnumMap<GHOST, MOVE>> {
                             timeDue));
         }
         return myMoves;
+    }
+
+    @Override
+    public EnumMap<GHOST, MOVE> getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 
     /**
