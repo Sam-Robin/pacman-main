@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.Controller;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 import java.util.EnumMap;
@@ -45,5 +46,10 @@ public class Legacy extends Controller<EnumMap<GHOST, MOVE>> {
         }
 
         return myMoves;
+    }
+
+    @Override
+    public EnumMap<GHOST, MOVE> getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

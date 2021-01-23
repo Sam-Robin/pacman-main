@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.Controller;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
@@ -30,5 +31,10 @@ public final class RandomGhosts extends Controller<EnumMap<GHOST, MOVE>> {
         }
 
         return moves;
+    }
+
+    @Override
+    public EnumMap<GHOST, MOVE> getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

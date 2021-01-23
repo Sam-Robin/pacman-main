@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 import java.util.Random;
@@ -21,5 +22,10 @@ public final class RandomNonRevPacMan extends PacmanController {
         MOVE[] possibleMoves = game.getPossibleMoves(game.getPacmanCurrentNodeIndex(), game.getPacmanLastMoveMade());        //set flag as false to prevent reversals
 
         return possibleMoves[rnd.nextInt(possibleMoves.length)];
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

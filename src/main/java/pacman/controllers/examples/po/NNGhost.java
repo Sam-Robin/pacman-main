@@ -19,7 +19,13 @@ public class NNGhost extends DecentralisedGhostController {
     }
 
     @Override
-    public Constants.MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+    public Constants.MOVE getMove(Game game, long timeDue) {
+        return null;
+    }
+
+    @Override
+    public Object getMove(NeuralNetwork network, Game game, long timeDue) {
+        int edibleTime = game.getGhostEdibleTime(ghost);
         return null;
     }
 }

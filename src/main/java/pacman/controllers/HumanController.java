@@ -1,5 +1,6 @@
 package pacman.controllers;
 
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
@@ -34,5 +35,10 @@ public class HumanController extends PacmanController {
             default:
                 return MOVE.NEUTRAL;
         }
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

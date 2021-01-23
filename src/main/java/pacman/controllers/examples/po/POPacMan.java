@@ -2,6 +2,7 @@ package pacman.controllers.examples.po;
 
 import com.fossgalaxy.object.annotations.ObjectDef;
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 import java.util.ArrayList;
@@ -102,6 +103,11 @@ public class POPacMan extends PacmanController {
         }
         // Must be possible to turn around
         return game.getPacmanLastMoveMade().opposite();
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 
     @Override

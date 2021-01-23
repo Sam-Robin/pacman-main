@@ -1,6 +1,7 @@
 package pacman.entries.pacman;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
@@ -17,5 +18,10 @@ public class MyPacMan extends PacmanController {
         //Place your game logic here to play the game as Ms Pac-Man
 
         return myMove;
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

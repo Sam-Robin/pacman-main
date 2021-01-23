@@ -2,6 +2,7 @@ package pacman.controllers.examples.po;
 
 import com.fossgalaxy.object.annotations.ObjectDef;
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants;
 import pacman.game.Game;
 
@@ -21,6 +22,11 @@ public class PORandomPacMan extends PacmanController {
     @Override
     public Constants.MOVE getMove(Game game, long timeDue) {
         return allMoves[rnd.nextInt(allMoves.length)];
+    }
+
+    @Override
+    public Constants.MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 
 }

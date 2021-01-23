@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.Controller;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 import java.util.EnumMap;
@@ -15,6 +16,11 @@ public class DudGhosts extends Controller<EnumMap<GHOST, MOVE>> {
 
     @Override
     public EnumMap<GHOST, MOVE> getMove(Game game, long timeDue) {
+        return null;
+    }
+
+    @Override
+    public EnumMap<GHOST, MOVE> getMove(NeuralNetwork network, Game game, long timeDue) {
         return null;
     }
 }

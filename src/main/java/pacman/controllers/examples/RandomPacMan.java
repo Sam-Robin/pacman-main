@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
@@ -19,5 +20,10 @@ public final class RandomPacMan extends PacmanController {
     @Override
     public MOVE getMove(Game game, long timeDue) {
         return allMoves[rnd.nextInt(allMoves.length)];
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 import java.util.ArrayList;
@@ -81,6 +82,11 @@ public class StarterPacMan extends PacmanController {
 
         //return the next direction once the closest target has been identified
         return game.getNextMoveTowardsTarget(current, game.getClosestNodeIndexFromNodeIndex(current, targetsArray, DM.PATH), DM.PATH);
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }
 

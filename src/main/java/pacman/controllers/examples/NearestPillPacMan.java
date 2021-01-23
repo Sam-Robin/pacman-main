@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Game;
 
 import static pacman.game.Constants.DM;
@@ -37,5 +38,10 @@ public class NearestPillPacMan extends PacmanController {
 
         //return the next direction once the closest target has been identified
         return game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), game.getClosestNodeIndexFromNodeIndex(currentNodeIndex, targetNodeIndices, DM.PATH), DM.PATH);
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }

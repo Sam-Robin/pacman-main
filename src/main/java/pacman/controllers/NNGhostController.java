@@ -41,7 +41,7 @@ public class NNGhostController extends Controller<EnumMap<Constants.GHOST, Const
         for (Constants.GHOST ghost : Constants.GHOST.values()) {
             myMoves.put(
                     ghost,
-                    controllers.get(ghost).getMove(
+                    (Constants.MOVE) controllers.get(ghost).getMove(
                             network, (po) ? game.copy(ghost) : game.copy(),
                             timeDue));
         }

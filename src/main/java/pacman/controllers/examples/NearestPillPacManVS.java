@@ -1,6 +1,7 @@
 package pacman.controllers.examples;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants.DM;
 import pacman.game.Game;
 import pacman.game.GameView;
@@ -80,5 +81,10 @@ public final class NearestPillPacManVS extends PacmanController {
         //				GameView.addPoints(game,colors[index++],game.getAStarPath(game.getGhostCurrentNodeIndex(ghostType),currentNodeIndex,game.getGhostLastMoveMade(ghostType)));
 
         return game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), nearest, DM.PATH);
+    }
+
+    @Override
+    public MOVE getMove(NeuralNetwork network, Game game, long timeDue) {
+        return null;
     }
 }
