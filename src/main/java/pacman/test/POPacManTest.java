@@ -11,9 +11,10 @@ import pacman.game.GameView;
 public class POPacManTest {
 
     public static void main(String[] args) throws InterruptedException {
-        Game game = new Game(0);
+        Game game = new Game(1);
 
         GameView view = new GameView(game);
+        System.out.println(game.isGamePo());
 
         POPacMan pacman = new POPacMan();
         POCommGhosts ghosts = new POCommGhosts(50);

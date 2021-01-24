@@ -3,6 +3,7 @@ package pacman.controllers.examples.po.NN;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Represents a neural network. Is scalable and versatile
@@ -72,5 +73,91 @@ public class NeuralNetwork implements Serializable {
         }
 
         return sum;
+    }
+
+    /**
+     * Create a double[] of length n, with weights as each element
+     * @param n     array length
+     * @return      array of weights
+     */
+    public static List<Double> generateWeights(int n) {
+        List<Double> output = new ArrayList<>();
+        double min = -1;
+        double max = 1;
+        Random r = new Random();
+        for (int i = 0; i < n; i++) {
+            output.add(min + (max - min) * r.nextDouble());
+        }
+        return output;
+    }
+
+    /**
+     * Create a random bias between -100 and 100
+     * @return  bias
+     */
+    public static double generateBias() {
+        Random r = new Random();
+        double min = -100;
+        double max = 100;
+        double bias = (min + (max - min) * r.nextDouble());     // Random bias
+        return bias;
+    }
+
+    /**
+     * A generic cost function that uses the outputs of the network
+     * @param goal      goal value
+     * @param network   network to determine cost of
+     * @return          cost
+     */
+    public static double costFunction(double goal, NeuralNetwork network) {
+        return Math.abs(goal - network.getSum());
+    }
+
+    /**
+     *
+     * @param inputs    Input variables
+     * @param design    Dimensions of the network
+     * @return          Neural network according to design
+     */
+    public static NeuralNetwork generateRandomNetwork(List<Double> inputs,
+                                                      int[] design) {
+        List<Layer> layers = new ArrayList<>();
+        // Create neurons for input layer
+        List<Neuron> neurons = new ArrayList<>();
+        for (int i = 0; i < design[0]; i++) {
+            Neuron neuron = new Neuron(inputs, generateWeights(5), generateBias());
+            neurons.add(neuron);
+        }
+        // Create input layer
+        InputLayer inputLayer = new InputLayer(neurons, inputs);
+        layers.add(inputLayer);     // Add input layer to layers
+
+        // Create hidden layer(s)
+        // Hidden layers are stored in all but the first and last elements of design
+        for (int i = 1; i < design.length - 1; i++) {
+            neurons = new ArrayList<>();
+            // Create neurons as per the design
+            for (int n = 0; n < design[i]; n++) {
+                // Number of weights is equal to the number of neurons in the previous layer
+                List<Double> weights = generateWeights(design[i - 1]);
+                neurons.add(new Neuron(null, weights, generateBias()));
+            }
+            // Create this hidden layer
+            HiddenLayer hiddenLayer = new HiddenLayer(neurons);
+            layers.add(hiddenLayer);        // Add hidden layer to network
+        }
+
+        // Create neurons for output layer
+        neurons = new ArrayList<>();
+        for (int i = 0; i < design[design.length - 1]; i++) {
+            // Number of weights is equal to the number of neurons in the
+            // second-to-last layer
+            List<Double> weights = generateWeights(design[design.length - 2]);
+            neurons.add(new Neuron(null, weights, generateBias()));
+        }
+        // Create output layer
+        OutputLayer outputLayer = new OutputLayer(neurons);
+        layers.add(outputLayer);        // Add output layer to neural network
+        return new NeuralNetwork(layers);
     }
 }
