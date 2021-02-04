@@ -60,4 +60,12 @@ public class Layer {
             n.calculate();
         }
     }
+
+    public List<Neuron> getNeurons() {
+        return neurons;
+    }
+
+    public List<Double> getInputs() {
+        return inputs;
+    }
 }

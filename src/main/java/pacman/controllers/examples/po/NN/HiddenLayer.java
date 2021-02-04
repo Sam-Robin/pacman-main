@@ -16,4 +16,9 @@ public class HiddenLayer extends Layer {
     public HiddenLayer(List<Neuron> neurons) {
         this.neurons = neurons;
     }
+
+    public HiddenLayer(List<Neuron> neurons, List<Double> inputs) {
+        this.neurons = neurons;
+        this.inputs = inputs;
+    }
 }

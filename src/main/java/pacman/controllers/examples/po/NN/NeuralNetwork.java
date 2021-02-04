@@ -164,4 +164,8 @@ public class NeuralNetwork implements Serializable {
         layers.add(outputLayer);        // Add output layer to neural network
         return new NeuralNetwork(layers);
     }
+
+    public List<Layer> getLayers() {
+        return layers;
+    }
 }
