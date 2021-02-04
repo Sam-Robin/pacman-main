@@ -61,6 +61,10 @@ public class NeuralNetwork implements Serializable {
         return layers.get(layers.size() - 1).getOutputs();
     }
 
+    public void setInputs(List<Double> inputs) {
+        layers.get(0).setInputs(inputs);
+    }
+
     /**
      * Sum all the outputs of the network
      * @return
@@ -97,8 +101,8 @@ public class NeuralNetwork implements Serializable {
      */
     public static double generateBias() {
         Random r = new Random();
-        double min = -100;
-        double max = 100;
+        double min = -10;
+        double max = 10;
         double bias = (min + (max - min) * r.nextDouble());     // Random bias
         return bias;
     }
@@ -125,7 +129,7 @@ public class NeuralNetwork implements Serializable {
         // Create neurons for input layer
         List<Neuron> neurons = new ArrayList<>();
         for (int i = 0; i < design[0]; i++) {
-            Neuron neuron = new Neuron(inputs, generateWeights(5), generateBias());
+            Neuron neuron = new Neuron(inputs, generateWeights(inputs.size()), generateBias());
             neurons.add(neuron);
         }
         // Create input layer

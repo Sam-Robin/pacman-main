@@ -12,6 +12,7 @@ public class Neuron {
     private List<Double> inputs;
     private List<Double> synapticWeights;
     private double bias;
+    private double output;
 
     public Neuron(List<Double> inputs, List<Double> synapticWeights, double bias) {
         this.inputs = inputs;
@@ -23,12 +24,10 @@ public class Neuron {
      * Calculate the output value of this neuron
      * @return
      */
-    public double getOutput() {
+    public void calculate() {
         double linearCombo = linearCombination();
         // f(x) = f(v + b) aka f(linearCombo + bias)
-        double output = sigmoid(linearCombo + bias);
-
-        return output;
+        output = sigmoid(linearCombo + bias);
     }
 
     /**
@@ -89,6 +88,10 @@ public class Neuron {
         }
         output += "\nBias: " + bias + "\n";
 
+        return output;
+    }
+
+    public double getOutput() {
         return output;
     }
 }

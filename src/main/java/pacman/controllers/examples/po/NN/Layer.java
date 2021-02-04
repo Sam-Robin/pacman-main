@@ -41,6 +41,10 @@ public class Layer {
      * @return array of outputs
      */
     public List<Double> getOutputs() {
+        outputs.clear();
+        for (Neuron n : neurons) {
+            outputs.add(n.getOutput());
+        }
         return outputs;
     }
 
@@ -53,7 +57,7 @@ public class Layer {
         // Iterate through every neuron in this layer
         for (Neuron n : neurons) {
             // Add the neuron's output to the output list
-            outputs.add(n.getOutput());
+            n.calculate();
         }
     }
 }

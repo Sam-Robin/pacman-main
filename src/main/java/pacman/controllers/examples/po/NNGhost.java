@@ -13,6 +13,7 @@ public class NNGhost extends DecentralisedGhostController {
     private int pacmanLastSeen;
     private int[] ghostsLastKnown;
     private int distanceToPacman;
+    private int toNode;
 
     public NNGhost(Constants.GHOST ghost) {
         super(ghost);
@@ -30,15 +31,25 @@ public class NNGhost extends DecentralisedGhostController {
         distanceToPacman = -1;
     }
 
+    /**
+     * Sets the initial parameters of the neural network.
+     * @param game
+     */
     public void setupNN(Game game) {
+        int myLocation = game.getGhostCurrentNodeIndex(ghost);
         int pacmanLocation = whereIsPacman(game);
         int edibleTime = game.getGhostEdibleTime(ghost);
+        int score = game.getScore();
+        int time = game.getTotalTime();
 
         ArrayList<Double> inputs = new ArrayList<>();
-        inputs.add((double) pacmanLocation);
+        inputs.add((double) myLocation / 2);
+        inputs.add((double) pacmanLocation / 2);
         inputs.add((double) edibleTime);
+        inputs.add((double) score);
+        inputs.add((double) time);
 
-        int[] design = { inputs.size(), 5, 10, game.getNumberOfNodes() };
+        int[] design = { inputs.size(), 5, 8, 5, 4 };
 
         network = NeuralNetwork.generateRandomNetwork(inputs, design);
     }
@@ -78,6 +89,17 @@ public class NNGhost extends DecentralisedGhostController {
                 i++;
             }
         }
+
+        int score = game.getScore();
+        int time = game.getTotalTime();
+
+        List<Double> inputs = new ArrayList<>();
+        inputs.add((double) currentLocation / 2);
+        inputs.add((double) pacmanLocation / 2);
+        inputs.add((double) edibleTime);
+        inputs.add((double) score);
+        inputs.add((double) time);
+        network.setInputs(inputs);
     }
 
     @Override
@@ -89,46 +111,26 @@ public class NNGhost extends DecentralisedGhostController {
         // Get the next node to move to
         ArrayList<Double> outputs = (ArrayList) network.getOutputs();
 
-        // Convert ArrayList to HashMap
-        HashMap<Integer, Double> nodeChoices = new HashMap<>();
-        int i = 0;
-        for (Double d : outputs) {
-            nodeChoices.put(i, d);
-            i++;
-        }
-
-        // Sort the HashMap by values
-        List<Integer> mapKeys = new ArrayList<>(nodeChoices.keySet());
-        List<Double> mapValues = new ArrayList<>(nodeChoices.values());
-        Collections.sort(mapValues);
-        Collections.reverse(mapValues);
-        Collections.sort(mapKeys);
-        Collections.reverse(mapKeys);
-        LinkedHashMap<Integer, Double> sortedMap = new LinkedHashMap<>();
-
-        Iterator<Double> valueIterator = mapValues.iterator();
-        while(valueIterator.hasNext()) {
-            Double value = valueIterator.next();
-            Iterator<Integer> keyIterator = mapKeys.iterator();
-
-            while (keyIterator.hasNext()) {
-                Integer key = keyIterator.next();
-                Double comp1 = nodeChoices.get(key);
-                Double comp2 = value;
-
-                if (comp1.equals(comp2)) {
-                    keyIterator.remove();
-                    sortedMap.put(key, value);
-                    break;
-                }
+        int largest = 0;
+        for (int c = 0; c < outputs.size(); c++) {
+            if (outputs.get(c) > outputs.get(largest)) {
+                largest = c;
             }
         }
+        if (largest == 0) {
+            return Constants.MOVE.UP;
+        }
+        else if (largest == 1) {
+            return Constants.MOVE.DOWN;
+        }
+        else if (largest == 2) {
+            return Constants.MOVE.LEFT;
+        }
+        else if (largest == 3) {
+            return Constants.MOVE.RIGHT;
+        }
 
-        Map.Entry<Integer, Double> entry = sortedMap.entrySet().iterator().next();
-        Integer node = entry.getKey();
-
-        return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), node,
-                game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
+        return Constants.MOVE.UP;
     }
 
     @Override
@@ -144,5 +146,17 @@ public class NNGhost extends DecentralisedGhostController {
     private int whereIsPacman(Game game) {
         int pacmanLocation = game.getPacmanCurrentNodeIndex();
         return pacmanLocation;
+    }
+
+    public int getToNode() {
+        return toNode;
+    }
+
+    public NeuralNetwork getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(NeuralNetwork network) {
+        this.network = network;
     }
 }

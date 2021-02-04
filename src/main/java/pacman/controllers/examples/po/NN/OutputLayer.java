@@ -9,9 +9,7 @@ import java.util.List;
  */
 public class OutputLayer extends Layer {
 
-    public OutputLayer() {
-
-    }
+    public OutputLayer() { }
 
     public OutputLayer(List<Neuron> neurons) {
         this.neurons = neurons;
