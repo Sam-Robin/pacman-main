@@ -49,7 +49,7 @@ public class NNGhost extends DecentralisedGhostController {
         inputs.add((double) score);
         inputs.add((double) time);
 
-        int[] design = { inputs.size(), 5, 4 };
+        int[] design = { inputs.size(), 4 };
 
         network = NeuralNetwork.generateRandomNetwork(inputs, design);
     }

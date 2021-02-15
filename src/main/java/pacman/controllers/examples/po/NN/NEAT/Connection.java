@@ -11,18 +11,21 @@ public class Connection {
     private double weight;
     private boolean isEnabled;
     private int innovationNumber;       // details when this connection was made
+    private static int count = 0;       // makes sure each connection has a different id
 
     public Connection() {
-
+        this.innovationNumber = count;
+        count++;
     }
 
     public Connection(Neuron fromNode, Neuron toNode, double weight,
-                      boolean isEnabled, int innovationNumber) {
+                      boolean isEnabled) {
         this.fromNode = fromNode;
         this.toNode = toNode;
         this.weight = weight;
         this.isEnabled = isEnabled;
-        this.innovationNumber = innovationNumber;
+        this.innovationNumber = count;
+        count++;
     }
 
     public Neuron getFromNode() {
