@@ -14,6 +14,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +44,10 @@ public class ExperimentExecutor {
         NNGhosts ghosts = new NNGhosts();
         ghosts.setupNNs(g);
 
-        // Run e experiments
+        // Setup list of experiments
+        ArrayList<ExperimentData> experiments = new ArrayList<>();
+
+        // Run exp experiments
         int exp = 10;
         for (int i = 0; i < exp; i++) {
             // Run the game
@@ -61,8 +65,13 @@ public class ExperimentExecutor {
 
                 g.advanceGame(pacmanMove, ghostMoves);
 
-                System.out.println("Level: " + g.getCurrentLevel() + "\tTime: " + g.getTotalTime());
+                System.out.println("Experiment: " + i + "\tLevel: " + g.getCurrentLevel() +
+                        "\tTime: " + g.getTotalTime());
             }
+
+            // Add data about game to experiments
+            experiments.add(new ExperimentData(ghosts.getGhostsNetworks(), i, g.getScore(), g.getTotalTime()));
+
 
             // Create a new game once the previous one has finished
             g = new Game(1000, 0, new BasicMessenger(), POType.LOS, 175);
@@ -82,5 +91,10 @@ public class ExperimentExecutor {
         FileWriter fileWriter = new FileWriter("map1.txt");
         fileWriter.write(json);
         fileWriter.close();
+
+        // Save the experiments to a file
+        FileWriter experimentWriter = new FileWriter("experiments.txt");
+        experimentWriter.write(serializer.serialize(experiments));
+        experimentWriter.close();
     }
 }
