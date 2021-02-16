@@ -61,6 +61,22 @@ public class Layer {
         }
     }
 
+    /**
+     * Creates a new Layer object that has the same variables as the current object
+     * @return
+     */
+    public Layer deepCopy() {
+        // Create a new ArrayList of identical Neuron objects
+        ArrayList<Neuron> newNeurons = new ArrayList<>();
+        for (Neuron neuron : neurons) {
+            newNeurons.add(neuron.deepCopy());
+        }
+
+        return new Layer(newNeurons,
+                new ArrayList<>(inputs),
+                new ArrayList<>(outputs));
+    }
+
     public List<Neuron> getNeurons() {
         return neurons;
     }

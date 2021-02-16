@@ -1,5 +1,6 @@
 package pacman.controllers.examples.po.NN;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,6 +54,16 @@ public class Neuron {
     private double sigmoid(double x) {
         // sigmoid: f(x) = ( 1 + e^-x )^-1
         return (1 / (1 + Math.pow(Math.E,(-1*x))));
+    }
+
+    /**
+     * Creates a new Neuron object that has the same variables as the current object
+     * @return
+     */
+    public Neuron deepCopy() {
+        return new Neuron(new ArrayList<>(inputs),
+                new ArrayList<>(synapticWeights),
+                bias);
     }
 
     public List<Double> getInputs() {

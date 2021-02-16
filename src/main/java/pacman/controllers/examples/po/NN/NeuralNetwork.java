@@ -98,6 +98,18 @@ public class NeuralNetwork implements Serializable {
     }
 
     /**
+     * Creates a new NeuralNetwork object that has the same variables as the current object
+     * @return
+     */
+    public NeuralNetwork deepCopy() {
+        ArrayList<Layer> newLayers = new ArrayList<>();
+        for (Layer layer : layers) {
+            newLayers.add(layer.deepCopy());
+        }
+        return new NeuralNetwork(newLayers);
+    }
+
+    /**
      * Sum all the outputs of the network
      * @return
      */
