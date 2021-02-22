@@ -1,9 +1,8 @@
 package pacman.controllers.examples.po.NN.NEAT;
 
-import pacman.controllers.examples.po.NN.*;
-
+import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.HashMap;
 
 /**
  * Class used to perform NEAT on neural networks
@@ -12,118 +11,199 @@ import java.util.Random;
  */
 public class Neat {
 
-    private ArrayList<Connection> connections;
-    private ArrayList<Neuron> neurons;
+    private HashMap<ConnectionGene, ConnectionGene> connections;
+    private ArrayList<NodeGene> nodes;
+    public static final int MAX_NODES = (int) Math.pow(2,20);
+    private int inputSize;
+    private int outputSize;
+    private int maxClients;
+    private double C1 = 1, C2 = 1, C3 = 1;
+    private double WEIGHT_SHIFT_STRENGTH = 0.3, WEIGHT_RANDOM_STRENGTH = 1;
+    private double PROBABILITY_MUTATE_LINK = 0.4;
+    private double PROBABILITY_MUTATE_NODE = 0.4;
+    private double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.4;
+    private double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.4;
+    private double PROBABILITY_MUTATE_TOGGLE_LINK = 0.4;
 
     public Neat() {
-        connections = new ArrayList<>();
-        neurons = new ArrayList<>();
+        connections = new HashMap<>();
+        nodes = new ArrayList<>();
     }
 
-    /**
-     * Mutate a network's topology by adding a connection, adding a node or changing a neuron's weights
-     * @param network
-     */
-    public NeuralNetwork mutate(NeuralNetwork network) {
-        /*
-        *   TODO:
-        *   45% chance to add connection to a layer
-        *   45% chance to add node on a connection
-        *   10% chance to change weights of a neuron
-        *
-        *   CURRENT:
-        *   100% chance to change weights of a neuron
-         */
-////
-////        // Add connection to a layer
-////        if (selector < 45) {
-////
-////        }
-////        // Add node on a connection
-////        else if (selector < 90) {
-////
-////        }
-////        // Change the weights of a neuron
-////        else {
-////
-////        }
+    public Neat(int inputSize, int outputSize, int maxClients) {
+        connections = new HashMap<>();
+        nodes = new ArrayList<>();
+        this.reset(inputSize, outputSize, maxClients);
+    }
 
-        /* Change weights of a neuron */
-        // Select a random layer
-        Random random = new Random();
-        int min = 0;
-        int max = network.getLayers().size();
-        int layerSelector = random.nextInt(max - min) + min;
-        Layer layer = network.getLayers().get(layerSelector);
+    public Genome emptyGenome() {
+        Genome g = new Genome(this);
 
-        // Select a random neuron
-        max = layer.getNeurons().size();
-        int neuronSelector = random.nextInt(max - min) + min;
-        Neuron neuron = layer.getNeurons().get(neuronSelector);
-
-        // Change its weights
-        ArrayList<Double> newWeights = (ArrayList<Double>) NeuralNetwork.generateWeights(neuron.getSynapticWeights().size());
-        neuron.setSynapticWeights(newWeights);
-
-        /* Update connections with new connections */
-        // Check previous layers if not an InputLayer
-        if (!(layer instanceof InputLayer)) {
-            // Get the previous layer
-            Layer previousLayer = network.getLayers().get(layerSelector - 1);
-            // Iterate through the previous layer
-            for (int i = 0; i < neuron.getSynapticWeights().size(); i++) {
-                Neuron fromNode = previousLayer.getNeurons().get(i);
-                double weight = neuron.getSynapticWeights().get(i);
-                Connection connection = new Connection(fromNode, neuron, weight, true);
-                connections.add(connection);
-            }
+        for (int i = 0; i < inputSize + outputSize; i++) {
+            g.getNodes().add(getNode(i + 1));
         }
 
-        return network;
+        return g;
+    }
+
+    public void reset(int inputSize, int outputSize, int maxClients) {
+        this.inputSize = inputSize;
+        this.outputSize = outputSize;
+        this.maxClients = maxClients;
+
+        connections.clear();
+        nodes.clear();
+
+        for (int i = 0; i < inputSize; i++) {
+            NodeGene n = getNode();
+            n.setX(0.1);
+            n.setY((i + 1) / (inputSize + 0.1));
+        }
+
+        for (int i = 0; i < outputSize; i++) {
+            NodeGene n = getNode();
+            n.setX(0.9);
+            n.setY((i + 1) / (inputSize + 0.1));
+        }
     }
 
     /**
-     * Create a new network by combining two together
-     * @param parent1   fittest parent
-     * @param parent2   less fit parent
+     * Creates a new node and returns it
      * @return
      */
-    public NeuralNetwork crossover(NeuralNetwork parent1, NeuralNetwork parent2) {
-        return null;
+    public NodeGene getNode() {
+        NodeGene n = new NodeGene(nodes.size() + 1);
+        nodes.add(n);
+        return n;
     }
 
     /**
-     * Determine the compatibility (or likeness) of two networks
-     * @param n1
-     * @param n2
+     * Finds a node in the list and returns it. If it is not in the list, then a new node is made and returned
+     * @param id
      * @return
      */
-    public double calculateCompatibility(NeuralNetwork n1, NeuralNetwork n2) {
-        return 0.0;
+    public NodeGene getNode(int id) {
+        if (id <= nodes.size()) {
+            return nodes.get(id - 1);
+        }
+        return getNode();
     }
 
-    /**
-     * Finds a connection that has a particular toNeuron
-     * @param toNeuron
-     * @return
-     */
-    public Connection findConnectionWithToNeuron(Neuron toNeuron) {
-        return null;
+    public static ConnectionGene getConnection(ConnectionGene con) {
+        ConnectionGene c = new ConnectionGene(con.getFromNode(), con.getToNode());
+        c.setWeight(con.getWeight());
+        c.setEnabled(con.isEnabled());
+        return c;
     }
 
-    /**
-     * Adds a set of connections to the already existing connections
-     * @param cons
-     */
-    public void addConnections(ArrayList<Connection> cons) {
-        connections.addAll(cons);
+    public ConnectionGene getConnection(NodeGene node1, NodeGene node2) {
+        ConnectionGene connectionGene = new ConnectionGene(node1, node2);
+
+        if (connections.containsKey(connectionGene)) {
+            connectionGene.setInnovationNumber(connections.get(connectionGene).getInnovationNumber());
+        }
+        else {
+            connectionGene.setInnovationNumber(connections.size() + 1);
+            connections.put(connectionGene, connectionGene);
+        }
+
+        return connectionGene;
     }
 
-    public ArrayList<Connection> getConnections() {
+
+    public HashMap<ConnectionGene, ConnectionGene> getConnections() {
         return connections;
     }
 
-    public void setConnections(ArrayList<Connection> connections) {
+    public void setConnections(HashMap<ConnectionGene, ConnectionGene> connections) {
         this.connections = connections;
+    }
+
+    public double getC1() {
+        return C1;
+    }
+
+    public void setC1(double c1) {
+        C1 = c1;
+    }
+
+    public double getC2() {
+        return C2;
+    }
+
+    public void setC2(double c2) {
+        C2 = c2;
+    }
+
+    public double getC3() {
+        return C3;
+    }
+
+    public void setC3(double c3) {
+        C3 = c3;
+    }
+
+    public double getWEIGHT_SHIFT_STRENGTH() {
+        return WEIGHT_SHIFT_STRENGTH;
+    }
+
+    public void setWEIGHT_SHIFT_STRENGTH(double WEIGHT_SHIFT_STRENGTH) {
+        this.WEIGHT_SHIFT_STRENGTH = WEIGHT_SHIFT_STRENGTH;
+    }
+
+    public double getWEIGHT_RANDOM_STRENGTH() {
+        return WEIGHT_RANDOM_STRENGTH;
+    }
+
+    public void setWEIGHT_RANDOM_STRENGTH(double WEIGHT_RANDOM_STRENGTH) {
+        this.WEIGHT_RANDOM_STRENGTH = WEIGHT_RANDOM_STRENGTH;
+    }
+
+    public double getPROBABILITY_MUTATE_LINK() {
+        return PROBABILITY_MUTATE_LINK;
+    }
+
+    public void setPROBABILITY_MUTATE_LINK(double PROBABILITY_MUTATE_LINK) {
+        this.PROBABILITY_MUTATE_LINK = PROBABILITY_MUTATE_LINK;
+    }
+
+    public double getPROBABILITY_MUTATE_NODE() {
+        return PROBABILITY_MUTATE_NODE;
+    }
+
+    public void setPROBABILITY_MUTATE_NODE(double PROBABILITY_MUTATE_NODE) {
+        this.PROBABILITY_MUTATE_NODE = PROBABILITY_MUTATE_NODE;
+    }
+
+    public double getPROBABILITY_MUTATE_WEIGHT_SHIFT() {
+        return PROBABILITY_MUTATE_WEIGHT_SHIFT;
+    }
+
+    public void setPROBABILITY_MUTATE_WEIGHT_SHIFT(double PROBABILITY_MUTATE_WEIGHT_SHIFT) {
+        this.PROBABILITY_MUTATE_WEIGHT_SHIFT = PROBABILITY_MUTATE_WEIGHT_SHIFT;
+    }
+
+    public double getPROBABILITY_MUTATE_WEIGHT_RANDOM() {
+        return PROBABILITY_MUTATE_WEIGHT_RANDOM;
+    }
+
+    public void setPROBABILITY_MUTATE_WEIGHT_RANDOM(double PROBABILITY_MUTATE_WEIGHT_RANDOM) {
+        this.PROBABILITY_MUTATE_WEIGHT_RANDOM = PROBABILITY_MUTATE_WEIGHT_RANDOM;
+    }
+
+    public double getPROBABILITY_MUTATE_TOGGLE_LINK() {
+        return PROBABILITY_MUTATE_TOGGLE_LINK;
+    }
+
+    public void setPROBABILITY_MUTATE_TOGGLE_LINK(double PROBABILITY_MUTATE_TOGGLE_LINK) {
+        this.PROBABILITY_MUTATE_TOGGLE_LINK = PROBABILITY_MUTATE_TOGGLE_LINK;
+    }
+
+    public int getMaxClients() {
+        return maxClients;
+    }
+
+    public void setMaxClients(int maxClients) {
+        this.maxClients = maxClients;
     }
 }

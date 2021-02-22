@@ -1,7 +1,5 @@
 package pacman.controllers.examples.po.NN;
 
-import pacman.controllers.examples.po.NN.NEAT.Connection;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,36 +63,6 @@ public class NeuralNetwork implements Serializable {
 
     public void setInputs(List<Double> inputs) {
         layers.get(0).setInputs(inputs);
-    }
-
-    /**
-     * Return all neuron connections (used by NEAT)
-     * @return
-     */
-    public ArrayList<Connection> getConnections() {
-        ArrayList<Connection> output = new ArrayList<>();
-
-        // Iterate through all layers
-        for (int l = 0; l < layers.size(); l++) {
-            Layer currentLayer = layers.get(l);
-            // Do not add connections from the InputLayer - they have no fromNode
-            if (!(currentLayer instanceof InputLayer)) {
-                Layer previousLayer = layers.get(l - 1);
-                // Iterate through the neurons in the layer
-                for (Neuron neuron : currentLayer.getNeurons()) {
-                    int synapticWeightsLength = neuron.getSynapticWeights().size();
-                    // Iterate through the synaptic weights in this neuron
-                    for (int i = 0; i < synapticWeightsLength; i++) {
-                        Neuron fromNode = previousLayer.getNeurons().get(i);
-                        Neuron toNode = neuron;
-                        double weight = neuron.getSynapticWeights().get(i);
-                        Connection connection = new Connection(fromNode, toNode, weight, true);
-                        output.add(connection);
-                    }
-                }
-            }
-        }
-        return output;
     }
 
     /**
