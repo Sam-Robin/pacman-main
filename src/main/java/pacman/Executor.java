@@ -274,9 +274,13 @@ public class Executor {
 
             while (!game.gameOver()) {
                 handlePeek(game);
-                game.advanceGame(
-                        pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
-                        ghostControllerCopy.getMove(game.copy(), System.currentTimeMillis() + timeLimit));
+                try {
+                    game.advanceGame(
+                            pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
+                            ghostControllerCopy.getMove(game.copy(), System.currentTimeMillis() + timeLimit));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             stats.add(game.getScore());
             ticks.add(game.getTotalTime());
@@ -296,7 +300,7 @@ public class Executor {
      * @param ghostController  The Ghosts controller
      * @param delay            The delay between time-steps
      */
-    public int runGame(Controller<MOVE> pacManController, MASController ghostController, int delay) {
+    public int runGame(Controller<MOVE> pacManController, MASController ghostController, int delay) throws Exception {
         Game game = setupGame();
 
         GameView gv = (visuals) ? setupGameView(pacManController, game) : null;

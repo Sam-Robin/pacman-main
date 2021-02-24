@@ -2,6 +2,8 @@ package pacman.test;
 
 import pacman.controllers.PacmanController;
 import pacman.controllers.examples.po.*;
+import pacman.controllers.examples.po.NN.NEAT.Genome;
+import pacman.controllers.examples.po.NN.NEAT.Neat;
 import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants;
 import pacman.game.Game;
@@ -41,8 +43,10 @@ public class ExperimentExecutor {
 
         //GameView gView = new GameView(g).showGame();
         PacmanController pacman = new POPacMan();
-        NNGhosts ghosts = new NNGhosts();
-        ghosts.setupNNs(g);
+        Neat neat = new Neat();
+        Genome genome = neat.emptyGenome();
+        NNGhosts ghosts = new NNGhosts(genome);
+        ghosts.runGhosts(g);
 
         // Setup list of experiments
         ArrayList<ExperimentData> experiments = new ArrayList<>();
@@ -59,7 +63,12 @@ public class ExperimentExecutor {
                 }
 
                 Constants.MOVE pacmanMove =
-                        pacman.getMove(g.copy(5), 40);
+                        null;
+                try {
+                    pacmanMove = pacman.getMove(g.copy(5), 40);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 EnumMap<Constants.GHOST, Constants.MOVE> ghostMoves =
                         ghosts.getMove(g.copy(), -1);
 
@@ -76,8 +85,8 @@ public class ExperimentExecutor {
             // Create a new game once the previous one has finished
             g = new Game(1000, 0, new BasicMessenger(), POType.LOS, 175);
             // Create a new set of NNGhosts
-            ghosts = new NNGhosts();
-            ghosts.setupNNs(g);
+            ghosts = new NNGhosts(genome);
+            ghosts.runGhosts(g);
         }
 
 

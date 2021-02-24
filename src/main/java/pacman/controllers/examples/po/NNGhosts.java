@@ -2,6 +2,7 @@ package pacman.controllers.examples.po;
 
 import com.fossgalaxy.object.annotations.ObjectDef;
 import pacman.controllers.DecentralisedGhostController;
+import pacman.controllers.examples.po.NN.NEAT.Genome;
 import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants;
 import pacman.game.Game;
@@ -11,31 +12,21 @@ import java.util.*;
 public class NNGhosts extends DecentralisedGhostController {
 
     @ObjectDef("POG")
-    public NNGhosts() {
+    public NNGhosts(Genome genome) {
         super(true, Constants.GHOST.BLINKY, new EnumMap<>(Constants.GHOST.class));
-        controllers.put(Constants.GHOST.BLINKY, new NNGhost(Constants.GHOST.BLINKY));
-        controllers.put(Constants.GHOST.INKY, new NNGhost(Constants.GHOST.INKY));
-        controllers.put(Constants.GHOST.PINKY, new NNGhost(Constants.GHOST.PINKY));
-        controllers.put(Constants.GHOST.SUE, new NNGhost(Constants.GHOST.SUE));
+        controllers.put(Constants.GHOST.BLINKY, new NNGhost(Constants.GHOST.BLINKY, genome));
+        controllers.put(Constants.GHOST.INKY, new NNGhost(Constants.GHOST.INKY, genome));
+        controllers.put(Constants.GHOST.PINKY, new NNGhost(Constants.GHOST.PINKY, genome));
+        controllers.put(Constants.GHOST.SUE, new NNGhost(Constants.GHOST.SUE, genome));
     }
 
     /**
      * Updates the neural networks of all the ghosts a controller has.
      * @param game
      */
-    public void updateNNs(Game game) {
+    public void runGhosts(Game game) {
         for (DecentralisedGhostController g : controllers.values()) {
             ((NNGhost) g).updateNN(game);
-        }
-    }
-
-    /**
-     * Instructs NNGhost objects to construct random neural networks
-     * @param game
-     */
-    public void setupNNs(Game game) {
-        for (DecentralisedGhostController g : controllers.values()) {
-            ((NNGhost) g).setupNN(game);
         }
     }
 
@@ -94,11 +85,15 @@ public class NNGhosts extends DecentralisedGhostController {
         myMoves.clear();
 
         for (Constants.GHOST ghost : Constants.GHOST.values()) {
-            myMoves.put(
-                    ghost,
-                    (Constants.MOVE)controllers.get(ghost).getMove(
-                            (po) ? game.copy(ghost) : game.copy(),
-                            timeDue));
+            try {
+                myMoves.put(
+                        ghost,
+                        (Constants.MOVE)controllers.get(ghost).getMove(
+                                (po) ? game.copy(ghost) : game.copy(),
+                                timeDue));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return myMoves;
     }

@@ -1,6 +1,8 @@
 package pacman.test;
 
 import pacman.controllers.PacmanController;
+import pacman.controllers.examples.po.NN.NEAT.Genome;
+import pacman.controllers.examples.po.NN.NEAT.Neat;
 import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.controllers.examples.po.NNGhosts;
 import pacman.controllers.examples.po.POPacMan;
@@ -55,7 +57,9 @@ public class BestExperimentExecutor {
 
         //GameView gView = new GameView(g).showGame();
         PacmanController pacman = new POPacMan();
-        NNGhosts ghosts = new NNGhosts();
+        Neat neat = new Neat();
+        Genome genome = neat.emptyGenome();
+        NNGhosts ghosts = new NNGhosts(genome);
         try {
             ghosts.setupNNs_Predefined(networks);
         }
@@ -72,7 +76,12 @@ public class BestExperimentExecutor {
             }
 
             Constants.MOVE pacmanMove =
-                    pacman.getMove(g.copy(5), 40);
+                    null;
+            try {
+                pacmanMove = pacman.getMove(g.copy(5), 40);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             EnumMap<Constants.GHOST, Constants.MOVE> ghostMoves =
                     ghosts.getMove(g.copy(), -1);
 

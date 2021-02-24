@@ -2,6 +2,8 @@ package pacman.controllers.examples.po.NN.NEAT;
 
 import pacman.controllers.examples.po.NN.Neuron;
 
+import java.util.Random;
+
 /**
  * Represents a connection between two Neuron objects
  */
@@ -14,6 +16,12 @@ public class ConnectionGene extends Gene {
     public ConnectionGene(NodeGene fromNode, NodeGene toNode) {
         this.fromNode = fromNode;
         this.toNode = toNode;
+        randomWeight();
+    }
+
+    private void randomWeight() {
+        Random random = new Random();
+        this.weight = (2 * random.nextDouble()) - 1;
     }
 
     public boolean equals(Object o) {

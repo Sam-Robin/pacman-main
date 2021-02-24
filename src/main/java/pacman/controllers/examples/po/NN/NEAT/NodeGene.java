@@ -1,12 +1,14 @@
 package pacman.controllers.examples.po.NN.NEAT;
 
-public class NodeGene extends Gene {
+public class NodeGene extends Gene implements Comparable {
 
     private double x, y;
 
     public NodeGene(int innovationNumber) {
         super(innovationNumber);
     }
+
+
 
     public double getX() {
         return x;
@@ -31,5 +33,10 @@ public class NodeGene extends Gene {
 
     public int hashCode() {
         return innovationNumber;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return Double.compare(this.x, ((NodeGene) o).getX());
     }
 }

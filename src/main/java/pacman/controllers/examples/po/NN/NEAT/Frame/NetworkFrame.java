@@ -17,7 +17,20 @@ public class NetworkFrame extends JFrame {
         networkPanel = new NetworkPanel();
         add(networkPanel);
 
-        setSize(600, 400);
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+
+        setVisible(true);
+    }
+
+    public NetworkFrame(NetworkPanel networkPanel) {
+        super("Network Viewer");
+
+        this.networkPanel = networkPanel;
+        add(networkPanel);
+
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
@@ -26,13 +39,5 @@ public class NetworkFrame extends JFrame {
 
     public void update() {
         networkPanel.repaint();
-    }
-
-    public void addNode(NodeGene node) {
-        networkPanel.addNode(node);
-    }
-
-    public void addConnection(ConnectionGene connection) {
-        networkPanel.addConnection(connection);
     }
 }

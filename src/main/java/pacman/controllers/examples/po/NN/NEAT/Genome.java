@@ -1,5 +1,7 @@
 package pacman.controllers.examples.po.NN.NEAT;
 
+import pacman.controllers.examples.po.NN.NEAT.Calculations.Calculator;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -8,17 +10,36 @@ public class Genome {
     private ArrayList<ConnectionGene> connections;
     private ArrayList<NodeGene> nodes;
     private Neat neat;
+    private Calculator calculator;
 
     public Genome() {
         connections = new ArrayList<>();
         nodes = new ArrayList<>();
         neat = new Neat();
+        this.calculator = new Calculator(this);
     }
 
     public Genome(Neat neat) {
         this.neat = neat;
         connections = new ArrayList<>();
         nodes = new ArrayList<>();
+        this.calculator = new Calculator(this);
+    }
+
+    /**
+     * Runs one set of data through the network
+     * @param data
+     */
+    public double[] calculate(double... data) throws Exception {
+        if (calculator != null) {
+            return calculator.calculate(data);
+        }
+
+        return null;
+    }
+
+    public void update() {
+        this.calculator = new Calculator(this);
     }
 
     /**
@@ -92,7 +113,7 @@ public class Genome {
 
         NodeGene middle = neat.getNode();
         middle.setX((fromNode.getX() + toNode.getX()) / 2);
-        middle.setX((fromNode.getY() + toNode.getY()) / 2 + Math.random() * 0.1 - 0.05);
+        middle.setY((fromNode.getY() + toNode.getY()) / 2 + Math.random() * 0.1 - 0.05);
 
         // Create connection from fromNode to middle
         ConnectionGene con1 = neat.getConnection(fromNode, middle);
@@ -131,7 +152,7 @@ public class Genome {
         ConnectionGene con = getRandomConnectionGene();
 
         if (con != null) {
-
+            con.setEnabled(!con.isEnabled());
         }
     }
 
@@ -143,7 +164,7 @@ public class Genome {
         Random r = new Random();
         int min = 0;
         int max = connections.size() - 1;
-        int index = (min + (max - min) * r.nextInt());
+        int index = r.nextInt(max - min) + min;
         return  connections.get(index);
     }
 
@@ -151,7 +172,7 @@ public class Genome {
         Random r = new Random();
         int min = 0;
         int max = nodes.size() - 1;
-        int index = (min + (max - min) * r.nextInt());
+        int index = r.nextInt(max - min) + min;
         return  nodes.get(index);
     }
 
@@ -220,14 +241,22 @@ public class Genome {
      */
     public double distance(Genome g2) {
         Genome g1 = this;
-        int highestInnovation_gene1 = g1.getConnections().get(g1.getConnections().size()-1).getInnovationNumber();
-        int highestInnovation_gene2 = g2.getConnections().get(g2.getConnections().size()-1).getInnovationNumber();
+        int highestInnovation_gene1 = 0;
+        int highestInnovation_gene2 = 0;
         int i_g1 = 0;
         int i_g2 = 0;
         int disjoints = 0;
         int excesses = 0;
         double weightDifference = 0;
         int similarities = 0;
+
+        if (g1.getConnections().size() != 0) {
+            highestInnovation_gene1 = g1.getConnections().get(g1.getConnections().size()-1).getInnovationNumber();
+        }
+
+        if (g2.getConnections().size() != 0) {
+            highestInnovation_gene2 = g2.getConnections().get(g2.getConnections().size()-1).getInnovationNumber();
+        }
 
         // If the highest innovation number in genome 2 is greater than the highest in genome 1...
         if (highestInnovation_gene1 < highestInnovation_gene2) {

@@ -86,7 +86,11 @@ public abstract class Controller<T> implements Runnable {
                     new Thread() {
                         public void run() {
                             threadStillRunning = true;
-                            lastMove = getMove(game, timeDue);
+                            try {
+                                lastMove = getMove(game, timeDue);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             hasComputed = true;
                             threadStillRunning = false;
                         }
@@ -119,7 +123,7 @@ public abstract class Controller<T> implements Runnable {
      * @param timeDue The time the next move is due
      * @return The move to be played (i.e., the move calculated by your controller)
      */
-    public abstract T getMove(Game game, long timeDue);
+    public abstract T getMove(Game game, long timeDue) throws Exception;
 
     public abstract T getMove(NeuralNetwork network, Game game, long timeDue);
 

@@ -44,7 +44,12 @@ public class GhostViewTest {
                 e.printStackTrace();
             }
 
-            Constants.MOVE pacmanMove = pacman.getMove(primaryGame.copy(5), 40);
+            Constants.MOVE pacmanMove = null;
+            try {
+                pacmanMove = pacman.getMove(primaryGame.copy(5), 40);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             EnumMap<Constants.GHOST, Constants.MOVE> ghostMoves = ghosts.getMove(primaryGame.copy(), -1);
 
             primaryGame.advanceGame(pacmanMove, ghostMoves);

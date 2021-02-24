@@ -36,11 +36,45 @@ public class Neat {
         this.reset(inputSize, outputSize, maxClients);
     }
 
+    /**
+     * Creates a genome with nodes and connections
+     * @return
+     */
     public Genome emptyGenome() {
         Genome g = new Genome(this);
 
+        // Create all the nodes
         for (int i = 0; i < inputSize + outputSize; i++) {
             g.getNodes().add(getNode(i + 1));
+        }
+
+        ArrayList<NodeGene> inputNodes = new ArrayList<>();
+        ArrayList<NodeGene> outputNodes = new ArrayList<>();
+        ArrayList<ConnectionGene> connections = new ArrayList<>();
+
+        // Create connections input and output nodes
+        for (NodeGene node : g.getNodes()) {
+            // Get the input genes and put them in ArrayList
+            if (node.getX() < 0.5) {
+                inputNodes.add(node);
+            }
+            // Put the output genes in the ArrayList
+            else {
+                outputNodes.add(node);
+            }
+        }
+
+        // Create connections from each input node to each output node
+        for (NodeGene inputNode : inputNodes) {
+            for (NodeGene outputNode : outputNodes) {
+                connections.add(new ConnectionGene(inputNode, outputNode));
+            }
+        }
+
+        g.getConnections().addAll(connections);
+
+        for (int i = 0; i < 10; i++) {
+            g.mutate();
         }
 
         return g;
@@ -65,6 +99,7 @@ public class Neat {
             n.setX(0.9);
             n.setY((i + 1) / (inputSize + 0.1));
         }
+
     }
 
     /**
@@ -91,6 +126,7 @@ public class Neat {
 
     public static ConnectionGene getConnection(ConnectionGene con) {
         ConnectionGene c = new ConnectionGene(con.getFromNode(), con.getToNode());
+        c.setInnovationNumber(con.getInnovationNumber());
         c.setWeight(con.getWeight());
         c.setEnabled(con.isEnabled());
         return c;
@@ -205,5 +241,13 @@ public class Neat {
 
     public void setMaxClients(int maxClients) {
         this.maxClients = maxClients;
+    }
+
+    public int getInputSize() {
+        return inputSize;
+    }
+
+    public int getOutputSize() {
+        return outputSize;
     }
 }

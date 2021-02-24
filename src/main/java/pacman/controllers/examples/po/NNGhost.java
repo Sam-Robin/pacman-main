@@ -1,6 +1,7 @@
 package pacman.controllers.examples.po;
 
 import pacman.controllers.DecentralisedGhostController;
+import pacman.controllers.examples.po.NN.NEAT.Genome;
 import pacman.controllers.examples.po.NN.NeuralNetwork;
 import pacman.game.Constants;
 import pacman.game.Game;
@@ -12,15 +13,16 @@ public class NNGhost extends DecentralisedGhostController {
     private NeuralNetwork network;
     private int pacmanLastSeen;
     private int[] ghostsLastKnown;
+    private Genome genome;
     private int distanceToPacman;
-    private int toNode;
+    private double[] inputs;
 
     public NNGhost(Constants.GHOST ghost) {
         super(ghost);
         network = new NeuralNetwork();
         this.pacmanLastSeen = -1;
         ghostsLastKnown = new int[3];
-        distanceToPacman = -1;
+        this.genome = new Genome();
     }
 
     public NNGhost(Constants.GHOST ghost, int TICK_THRESHOLD) {
@@ -28,30 +30,15 @@ public class NNGhost extends DecentralisedGhostController {
         this.TICK_THRESHOLD = TICK_THRESHOLD;
         this.pacmanLastSeen = -1;
         ghostsLastKnown = new int[3];
-        distanceToPacman = -1;
+        this.genome = new Genome();
     }
 
-    /**
-     * Sets the initial parameters of the neural network.
-     * @param game
-     */
-    public void setupNN(Game game) {
-        int myLocation = game.getGhostCurrentNodeIndex(ghost);
-        int pacmanLocation = whereIsPacman(game);
-        int edibleTime = game.getGhostEdibleTime(ghost);
-        int score = game.getScore();
-        int time = game.getTotalTime();
-
-        ArrayList<Double> inputs = new ArrayList<>();
-        inputs.add((double) myLocation / 2);
-        inputs.add((double) pacmanLocation / 2);
-        inputs.add((double) edibleTime);
-        inputs.add((double) score);
-        inputs.add((double) time);
-
-        int[] design = { inputs.size(), 4 };
-
-        network = NeuralNetwork.generateRandomNetwork(inputs, design);
+    public NNGhost(Constants.GHOST ghost, Genome genome) {
+        super(ghost);
+        this.TICK_THRESHOLD = TICK_THRESHOLD;
+        this.pacmanLastSeen = -1;
+        ghostsLastKnown = new int[3];
+        this.genome = genome;
     }
 
     /**
@@ -93,27 +80,31 @@ public class NNGhost extends DecentralisedGhostController {
         int score = game.getScore();
         int time = game.getTotalTime();
 
-        List<Double> inputs = new ArrayList<>();
-        inputs.add((double) currentLocation / 2);
-        inputs.add((double) pacmanLocation / 2);
-        inputs.add((double) edibleTime);
-        inputs.add((double) score);
-        inputs.add((double) time);
-        network.setInputs(inputs);
+        inputs = new double[5];
+        inputs[0] = currentLocation / 2;
+        inputs[1] = pacmanLocation / 2;
+        inputs[2] = edibleTime;
+        inputs[3] = score;
+        inputs[4] = time;
+        try {
+            genome.calculate(inputs);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public Constants.MOVE getMove(Game game, long timeDue) {
+    public Constants.MOVE getMove(Game game, long timeDue) throws Exception {
         // Update the neural network
         updateNN(game);
-        network.train();
 
         // Get the next node to move to
-        ArrayList<Double> outputs = (ArrayList) network.getOutputs();
+        double[] outputs = genome.calculate(inputs);
 
         int largest = 0;
-        for (int c = 0; c < outputs.size(); c++) {
-            if (outputs.get(c) > outputs.get(largest)) {
+        for (int c = 0; c < outputs.length; c++) {
+            if (outputs[c] > outputs[largest]) {
                 largest = c;
             }
         }
@@ -138,25 +129,19 @@ public class NNGhost extends DecentralisedGhostController {
         return null;
     }
 
-    /**
-     * Returns the location of pacman
-     * @param game
-     * @return
-     */
-    private int whereIsPacman(Game game) {
-        int pacmanLocation = game.getPacmanCurrentNodeIndex();
-        return pacmanLocation;
-    }
-
-    public int getToNode() {
-        return toNode;
-    }
-
     public NeuralNetwork getNetwork() {
         return network;
     }
 
     public void setNetwork(NeuralNetwork network) {
         this.network = network;
+    }
+
+    public Genome getGenome() {
+        return genome;
+    }
+
+    public void setGenome(Genome genome) {
+        this.genome = genome;
     }
 }

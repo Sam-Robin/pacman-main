@@ -20,7 +20,7 @@ public class MyGhostsTest {
      *
      * @param args Not used
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // Use a random seed for the game
         Random r = new Random();
         long rand = 100 + (100 + 100) * r.nextLong();
