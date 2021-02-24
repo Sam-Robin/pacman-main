@@ -184,7 +184,7 @@ public class Genome {
      */
     public static Genome crossover(Genome g1, Genome g2) {
         Neat neat = g1.getNeat();
-        Genome child = g1.getNeat().emptyGenome();
+        Genome child = new Genome();
         int i_g1 = 0;
         int i_g2 = 0;
 
@@ -205,6 +205,8 @@ public class Genome {
                     // Take the second gene and put it in the child
                     child.getConnections().add(neat.getConnection(gene2));
                 }
+                i_g1++;
+                i_g2++;
             }
             // If the innovation number of the node in genome 1 is higher than that in genome 2...
             else if (in1 > in2) {
@@ -227,9 +229,21 @@ public class Genome {
         }
 
         for (ConnectionGene c : child.getConnections()) {
-            child.getNodes().add(c.getFromNode());
-            child.getNodes().add(c.getToNode());
+            NodeGene fromNode = c.getFromNode();
+            NodeGene toNode = c.getToNode();
+            ArrayList<NodeGene> nodes = child.getNodes();
+
+            // Make sure nodes aren't being added twice
+            if (!nodes.contains(fromNode)) {
+                child.getNodes().add(fromNode);
+            }
+            if (!nodes.contains(toNode)) {
+                child.getNodes().add(toNode);
+            }
         }
+
+        // Mutate the child
+        child.mutate();
 
         return child;
     }
@@ -330,5 +344,9 @@ public class Genome {
 
     public void setNeat(Neat neat) {
         this.neat = neat;
+    }
+
+    public void setCalculator(Calculator calculator) {
+        this.calculator = calculator;
     }
 }

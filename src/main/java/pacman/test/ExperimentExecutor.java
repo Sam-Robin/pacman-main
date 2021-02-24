@@ -1,5 +1,6 @@
 package pacman.test;
 
+import com.opencsv.CSVWriter;
 import pacman.controllers.PacmanController;
 import pacman.controllers.examples.po.*;
 import pacman.controllers.examples.po.NN.NEAT.Genome;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ExperimentExecutor {
 
@@ -31,29 +34,22 @@ public class ExperimentExecutor {
     public static void main(String[] args) throws IOException {
         Game g = new Game(1000, 0, new BasicMessenger(), POType.LOS, 175);
         System.out.println(g.isGamePo());
-//        GameView[] ghostViews = new GameView[]{
-//                new GameView(g, false).showGame(),
-//                new GameView(g, false).showGame(),
-//                new GameView(g, false).showGame(),
-//                new GameView(g, false).showGame()
-//        };
-//        for (Constants.GHOST ghost : Constants.GHOST.values()) {
-//            ghostViews[ghost.ordinal()].setPO(true, ghost);
-//        }
 
         //GameView gView = new GameView(g).showGame();
         PacmanController pacman = new POPacMan();
-        Neat neat = new Neat();
+        Neat neat = new Neat(5, 4, 100);
         Genome genome = neat.emptyGenome();
         NNGhosts ghosts = new NNGhosts(genome);
+        genome.update();
         ghosts.runGhosts(g);
 
         // Setup list of experiments
         ArrayList<ExperimentData> experiments = new ArrayList<>();
 
         // Run exp experiments
-        int exp = 10;
+        int exp = 2;
         for (int i = 0; i < exp; i++) {
+            System.out.println("Running experiment " + (i + 1));
             // Run the game
             while(!g.gameOver()) {
                 try {
@@ -74,36 +70,51 @@ public class ExperimentExecutor {
 
                 g.advanceGame(pacmanMove, ghostMoves);
 
-                System.out.println("Experiment: " + i + "\tLevel: " + g.getCurrentLevel() +
-                        "\tTime: " + g.getTotalTime());
+//                System.out.println("Experiment: " + i + "\tLevel: " + g.getCurrentLevel() +
+//                        "\tTime: " + g.getTotalTime());
             }
 
             // Add data about game to experiments
-            experiments.add(new ExperimentData(ghosts.getGhostsNetworks(), i, g.getScore(), g.getTotalTime()));
+            experiments.add(new ExperimentData(genome, g.getScore(), i, g.getTotalTime()));
 
 
             // Create a new game once the previous one has finished
             g = new Game(1000, 0, new BasicMessenger(), POType.LOS, 175);
+            // Create a new genome
+            genome = neat.emptyGenome();
             // Create a new set of NNGhosts
             ghosts = new NNGhosts(genome);
+            genome.update();
             ghosts.runGhosts(g);
+
+            System.out.println("Experiment " + (i + 1) + " complete");
         }
 
+        // Set the calculators in the genomes to null to avoid circular references
+        for (ExperimentData experimentData : experiments) {
+            Genome gen = experimentData.getGenome();
+            gen.setCalculator(null);
+        }
 
-        HashMap<Constants.GHOST, NeuralNetwork> map = ghosts.getGhostsNetworks();
-
+        // Save the genomes to a file
         Serializer serializer = new Serializer();
-        NeuralNetwork map1 = map.entrySet().iterator().next().getValue();
-        String json = serializer.serialize(map1);
-        System.out.println(json.length());
-
-        FileWriter fileWriter = new FileWriter("map1.txt");
-        fileWriter.write(json);
-        fileWriter.close();
-
-        // Save the experiments to a file
-        FileWriter experimentWriter = new FileWriter("experiments.txt");
+        FileWriter experimentWriter = new FileWriter("genomes.txt");
         experimentWriter.write(serializer.serialize(experiments));
         experimentWriter.close();
+
+        // Save the experimental data to a file
+        String[][] data = new String[experiments.size()][3];
+        for (int i = 0; i < experiments.size(); i++) {
+            ExperimentData experimentData = experiments.get(i);
+            data[i] = new String[] { String.valueOf(experimentData.getGeneration()),
+                    String.valueOf(experimentData.getScore()),
+                    String.valueOf(experimentData.getTimeTaken()) };
+        }
+
+        CSVWriter writer = new CSVWriter(new FileWriter("experimental_data.csv"));
+        for (String[] array : data) {
+            writer.writeNext(array);
+        }
+        writer.close();
     }
 }

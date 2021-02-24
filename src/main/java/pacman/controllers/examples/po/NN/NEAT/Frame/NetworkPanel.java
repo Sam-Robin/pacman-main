@@ -10,19 +10,25 @@ import java.util.ArrayList;
 
 public class NetworkPanel extends JPanel {
     private Genome genome;
+    private int networkNumber;
 
     public NetworkPanel() {
         this.genome = new Genome();
+        this.networkNumber = 0;
+        setVisible(true);
     }
 
     public NetworkPanel(Genome genome) {
         this.genome = genome;
+        this.networkNumber = 0;
+        setVisible(true);
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         setBackground(Color.BLACK);
         g.setColor(Color.WHITE);
+
         // Draw nodes
         for (NodeGene node : genome.getNodes()) {
             int x = (int) (node.getX() * getWidth());
@@ -46,5 +52,13 @@ public class NetworkPanel extends JPanel {
 
     public void setGenome(Genome genome) {
         this.genome = genome;
+    }
+
+    public int getNetworkNumber() {
+        return networkNumber;
+    }
+
+    public void setNetworkNumber(int networkNumber) {
+        this.networkNumber = networkNumber;
     }
 }

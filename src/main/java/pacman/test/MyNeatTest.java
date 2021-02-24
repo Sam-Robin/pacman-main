@@ -15,6 +15,7 @@ import pacman.game.internal.POType;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MyNeatTest {
@@ -49,7 +50,7 @@ public class MyNeatTest {
         genome.update();
         ghosts.runGhosts(g);
 
-        int exp = 10;
+        int exp = 3;
         for (int i = 0; i < exp; i++) {
             while (!g.gameOver()) {
                 try {
@@ -94,10 +95,22 @@ public class MyNeatTest {
             // Store the genome and its score
             genomeScores.put(genome, g.getScore());
 
-            // Create a new genome
-            genome = neat.emptyGenome();
+            // If this was the second experiment...
+            if (i == 1) {
+                // Combine the previous two genomes
+                Iterator iterator = genomeScores.keySet().iterator();
+                Genome g1 = (Genome) iterator.next();
+                Genome g2 = (Genome) iterator.next();
+                genome = Genome.crossover(g1, g2);
+            }
+            // Otherwise...
+            else {
+                // Create a new genome
+                genome = neat.emptyGenome();
+            }
             ghosts = new NNGhosts(genome);
             genome.update();
+
 
             // Create a new game
             g = new Game(1000, 0, new BasicMessenger(), POType.LOS, 175);
@@ -113,7 +126,6 @@ public class MyNeatTest {
             // Create a new pacman view
             gView = new GameView(g).showGame();
         }
-
 
 //        NodeGene n1 = new NodeGene(0);
 //        n1.setX(0.2);

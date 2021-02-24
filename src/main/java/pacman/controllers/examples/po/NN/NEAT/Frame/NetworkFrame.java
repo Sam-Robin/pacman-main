@@ -38,6 +38,8 @@ public class NetworkFrame extends JFrame {
     }
 
     public void update() {
+        networkPanel.setNetworkNumber(networkPanel.getNetworkNumber() + 1);
         networkPanel.repaint();
+        this.setTitle("Network " + networkPanel.getNetworkNumber());
     }
 }

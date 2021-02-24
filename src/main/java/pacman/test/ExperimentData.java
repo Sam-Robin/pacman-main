@@ -1,8 +1,6 @@
 package pacman.test;
 
-import pacman.controllers.Controller;
-import pacman.controllers.examples.po.NN.NeuralNetwork;
-import pacman.game.Constants;
+import pacman.controllers.examples.po.NN.NEAT.Genome;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,29 +12,29 @@ import java.util.HashMap;
  */
 public class ExperimentData implements Comparable {
 
-    private HashMap<Constants.GHOST, NeuralNetwork> networks;
+    private Genome genome;
+    private int score;
     private int generation;
-    private int finalScore;
     private int timeTaken;
 
     public ExperimentData() {
 
     }
 
-    public ExperimentData(HashMap<Constants.GHOST, NeuralNetwork> networks, int generation,
-                          int finalScore, int timeTaken) {
-        this.networks = networks;
+    public ExperimentData(Genome genome, int score,
+                          int generation, int timeTaken) {
+        this.genome = genome;
+        this.score = score;
         this.generation = generation;
-        this.finalScore = finalScore;
         this.timeTaken = timeTaken;
     }
 
-    public HashMap<Constants.GHOST, NeuralNetwork> getNetworks() {
-        return networks;
+    public Genome getGenome() {
+        return genome;
     }
 
-    public void setNetworks(HashMap<Constants.GHOST, NeuralNetwork> networks) {
-        this.networks = networks;
+    public void setGenome(Genome genome) {
+        this.genome = genome;
     }
 
     public int getGeneration() {
@@ -45,14 +43,6 @@ public class ExperimentData implements Comparable {
 
     public void setGeneration(int generation) {
         this.generation = generation;
-    }
-
-    public int getFinalScore() {
-        return finalScore;
-    }
-
-    public void setFinalScore(int finalScore) {
-        this.finalScore = finalScore;
     }
 
     public int getTimeTaken() {
@@ -65,6 +55,14 @@ public class ExperimentData implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        return this.finalScore - ((ExperimentData) o).finalScore;
+        return this.score - ((ExperimentData) o).getScore();
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

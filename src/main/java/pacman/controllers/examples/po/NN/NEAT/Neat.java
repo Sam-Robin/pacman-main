@@ -20,10 +20,10 @@ public class Neat {
     private double C1 = 1, C2 = 1, C3 = 1;
     private double WEIGHT_SHIFT_STRENGTH = 0.3, WEIGHT_RANDOM_STRENGTH = 1;
     private double PROBABILITY_MUTATE_LINK = 0.4;
-    private double PROBABILITY_MUTATE_NODE = 0.4;
-    private double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.4;
-    private double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.4;
-    private double PROBABILITY_MUTATE_TOGGLE_LINK = 0.4;
+    private double PROBABILITY_MUTATE_NODE = 0.1;
+    private double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.1;
+    private double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.1;
+    private double PROBABILITY_MUTATE_TOGGLE_LINK = 0.3;
 
     public Neat() {
         connections = new HashMap<>();
