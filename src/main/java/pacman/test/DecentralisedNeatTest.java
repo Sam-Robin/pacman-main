@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class MyNeatTest {
+public class DecentralisedNeatTest {
 
     private static HashMap<Genome, Integer> genomeScores;
 
