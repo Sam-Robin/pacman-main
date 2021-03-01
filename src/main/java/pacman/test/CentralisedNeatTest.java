@@ -39,7 +39,7 @@ public class CentralisedNeatTest {
         GameView gView = new GameView(g).showGame();
 
         // Add the network connections to the NEAT object
-        Neat neat = new Neat(5, 4, 100);
+        Neat neat = new Neat(11, 16, 100);
         Genome genome = neat.emptyGenome();
         System.out.println(genome.getNodes().size());
 
@@ -76,6 +76,19 @@ public class CentralisedNeatTest {
 //                for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
 //                    System.out.println(entry.getKey().toString() + " moving " + entry.getValue().toString());
 //                }
+
+                try {
+                    EnumMap<Constants.GHOST, Constants.MOVE> ghostMoves =
+                            ghosts.getMove(g.copy(), -1);
+                    g.advanceGame(pacmanMove, ghostMoves);
+
+                    for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
+                    System.out.println(entry.getKey().toString() + " moving " + entry.getValue().toString());
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 // Display every ghost's view
                 for (GameView view : ghostViews) {

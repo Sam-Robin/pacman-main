@@ -16,6 +16,10 @@ public class CentralisedGhost extends CentralisedGhostController {
         super(ghost);
     }
 
+    public Constants.GHOST getGhost() {
+        return ghost;
+    }
+
     @Override
     public Object getMove(Game game, long timeDue) throws Exception {
         return null;
@@ -25,4 +29,5 @@ public class CentralisedGhost extends CentralisedGhostController {
     public Object getMove(NeuralNetwork network, Game game, long timeDue) {
         return null;
     }
+
 }

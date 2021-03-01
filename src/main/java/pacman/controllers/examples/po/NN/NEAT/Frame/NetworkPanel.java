@@ -11,6 +11,7 @@ import java.util.ArrayList;
 public class NetworkPanel extends JPanel {
     private Genome genome;
     private int networkNumber;
+    private int nodeOffset = 50;
 
     public NetworkPanel() {
         this.genome = new Genome();
@@ -33,7 +34,7 @@ public class NetworkPanel extends JPanel {
         for (NodeGene node : genome.getNodes()) {
             int x = (int) (node.getX() * getWidth());
             int y = (int) (node.getY() * getHeight());
-            g.drawOval(x, y, 10, 10);
+            g.drawOval(x, y - nodeOffset, 10, 10);
         }
 
         // Draw connections
@@ -46,7 +47,7 @@ public class NetworkPanel extends JPanel {
             int yFrom = (int) (connection.getFromNode().getY() * getHeight());
             int xTo = (int) (connection.getToNode().getX() * getWidth());
             int yTo = (int) (connection.getToNode().getY() * getHeight());
-            g.drawLine(xFrom, yFrom, xTo, yTo);
+            g.drawLine(xFrom, yFrom - nodeOffset, xTo, yTo - nodeOffset);
         }
     }
 

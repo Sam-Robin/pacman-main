@@ -73,7 +73,7 @@ public class Neat {
 
         g.getConnections().addAll(connections);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             g.mutate();
         }
 

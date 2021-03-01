@@ -10,6 +10,8 @@ import java.util.ArrayList;
 public class NetworkFrame extends JFrame {
 
     private NetworkPanel networkPanel;
+    private int width = 800;
+    private int height = 1000;
 
     public NetworkFrame() {
         super("Network Viewer");
@@ -17,7 +19,7 @@ public class NetworkFrame extends JFrame {
         networkPanel = new NetworkPanel();
         add(networkPanel);
 
-        setSize(800, 600);
+        setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
@@ -30,7 +32,7 @@ public class NetworkFrame extends JFrame {
         this.networkPanel = networkPanel;
         add(networkPanel);
 
-        setSize(800, 600);
+        setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 

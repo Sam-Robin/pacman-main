@@ -19,6 +19,9 @@ public class NodeGene extends Gene implements Comparable {
     }
 
     public double getY() {
+        if (y > 1) {
+            y = y / 2;
+        }
         return y;
     }
 
