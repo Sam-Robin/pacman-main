@@ -8,6 +8,12 @@ public class NodeGene extends Gene implements Comparable {
         super(innovationNumber);
     }
 
+    public NodeGene(int innovationNumber, double x, double y) {
+        super(innovationNumber);
+        this.x = x;
+        this.y = y;
+    }
+
 
 
     public double getX() {
@@ -32,6 +38,10 @@ public class NodeGene extends Gene implements Comparable {
     public boolean equals(Object o) {
         if (!(o instanceof NodeGene)) return false;
         return innovationNumber == ((NodeGene) o).getInnovationNumber();
+    }
+
+    public NodeGene deepCopy() {
+        return new NodeGene(this.innovationNumber, this.x, this.y);
     }
 
     public int hashCode() {

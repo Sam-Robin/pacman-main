@@ -2,10 +2,10 @@ package pacman.controllers.examples.po.NN.NEAT.Calculations;
 
 import pacman.controllers.examples.po.NN.NEAT.ConnectionGene;
 import pacman.controllers.examples.po.NN.NEAT.Genome;
+import pacman.controllers.examples.po.NN.NEAT.Node;
 import pacman.controllers.examples.po.NN.NEAT.NodeGene;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 

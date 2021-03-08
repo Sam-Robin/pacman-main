@@ -77,15 +77,11 @@ public class NNGhost extends DecentralisedGhostController {
             }
         }
 
-        int score = game.getScore();
-        int time = game.getTotalTime();
-
-        inputs = new double[5];
-        inputs[0] = currentLocation / 2;
-        inputs[1] = pacmanLocation / 2;
-        inputs[2] = edibleTime;
-        inputs[3] = score;
-        inputs[4] = time;
+        inputs = new double[4];
+        inputs[0] = currentLocation;
+        inputs[1] = pacmanLastSeen;
+        inputs[2] = distanceToPacman;
+        inputs[3] = edibleTime;
         try {
             genome.calculate(inputs);
         }

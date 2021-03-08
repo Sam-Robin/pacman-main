@@ -19,6 +19,15 @@ public class ConnectionGene extends Gene {
         randomWeight();
     }
 
+    public ConnectionGene(NodeGene fromNode, NodeGene toNode,
+                          double weight, boolean enabled, int innovationNumber) {
+        super(innovationNumber);
+        this.fromNode = fromNode;
+        this.toNode = toNode;
+        this.weight = weight;
+        this.enabled = enabled;
+    }
+
     private void randomWeight() {
         Random random = new Random();
         this.weight = (2 * random.nextDouble()) - 1;
@@ -31,6 +40,15 @@ public class ConnectionGene extends Gene {
 
         ConnectionGene c = (ConnectionGene) o;
         return (fromNode.equals(c.getFromNode()) && toNode.equals(c.getToNode()));
+    }
+
+    public ConnectionGene deepCopy() {
+        // Create deep copies of the node genes
+        NodeGene newFrom = fromNode.deepCopy();
+        NodeGene newTo = toNode.deepCopy();
+
+        return new ConnectionGene(newFrom, newTo, this.weight,
+                this.enabled, this.innovationNumber);
     }
 
     public int hashCode() {

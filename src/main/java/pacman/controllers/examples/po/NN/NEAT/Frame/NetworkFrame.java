@@ -40,8 +40,12 @@ public class NetworkFrame extends JFrame {
     }
 
     public void update() {
-        networkPanel.setNetworkNumber(networkPanel.getNetworkNumber() + 1);
+        networkPanel.setNetworkNumber(networkPanel.getNetworkNumber());
         networkPanel.repaint();
         this.setTitle("Network " + networkPanel.getNetworkNumber());
+    }
+
+    public void putTitle(String title) {
+        setTitle(title);
     }
 }

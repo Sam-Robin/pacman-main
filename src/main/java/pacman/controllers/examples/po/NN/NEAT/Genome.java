@@ -5,12 +5,13 @@ import pacman.controllers.examples.po.NN.NEAT.Calculations.Calculator;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Genome {
+public class Genome implements Comparable {
 
     private ArrayList<ConnectionGene> connections;
     private ArrayList<NodeGene> nodes;
     private Neat neat;
     private Calculator calculator;
+    private int score;
 
     public Genome() {
         connections = new ArrayList<>();
@@ -24,6 +25,24 @@ public class Genome {
         connections = new ArrayList<>();
         nodes = new ArrayList<>();
         this.calculator = new Calculator(this);
+    }
+
+    public Genome(ArrayList<ConnectionGene> connections, ArrayList<NodeGene> nodes,
+                  Neat neat, int score) {
+        this.connections = connections;
+        this.nodes = nodes;
+        this.neat = neat;
+        this.calculator = new Calculator(this);
+        this.score = score;
+    }
+
+    /**
+     * Copy constructor
+     * @param other
+     */
+    public Genome(Genome other) {
+        this(other.getConnections(), other.getNodes(), other.getNeat(),
+                other.getScore());
     }
 
     /**
@@ -44,27 +63,30 @@ public class Genome {
 
     /**
      * Mutate a network's topology by adding a connection, adding a node or changing a neuron's weights
+     * @param count     how many times to mutate
      */
-    public void mutate() {
-        // Mutate a link
-        if (neat.getPROBABILITY_MUTATE_LINK() > Math.random()) {
-            mutate_link();
-        }
-        // Mutate a node
-        if (neat.getPROBABILITY_MUTATE_NODE() > Math.random()) {
-            mutate_node();
-        }
-        // Mutate a node's isEnabled status
-        if (neat.getPROBABILITY_MUTATE_TOGGLE_LINK() > Math.random()) {
-            mutate_link_toggle();
-        }
-        // Mutate a weight on a connection by a random amount
-        if (neat.getPROBABILITY_MUTATE_WEIGHT_RANDOM() > Math.random()) {
-            mutate_weight_random();
-        }
-        // Mutate a weight on a connection by a shift
-        if (neat.getPROBABILITY_MUTATE_WEIGHT_SHIFT() > Math.random()) {
-            mutate_weight_shift();
+    public void mutate(int count) {
+        for (int i = 0; i < count; i++) {
+            // Mutate a link
+            if (neat.getPROBABILITY_MUTATE_LINK() > Math.random()) {
+                mutate_link();
+            }
+            // Mutate a node
+            if (neat.getPROBABILITY_MUTATE_NODE() > Math.random()) {
+                mutate_node();
+            }
+            // Mutate a node's isEnabled status
+            if (neat.getPROBABILITY_MUTATE_TOGGLE_LINK() > Math.random()) {
+                mutate_link_toggle();
+            }
+            // Mutate a weight on a connection by a random amount
+            if (neat.getPROBABILITY_MUTATE_WEIGHT_RANDOM() > Math.random()) {
+                mutate_weight_random();
+            }
+            // Mutate a weight on a connection by a shift
+            if (neat.getPROBABILITY_MUTATE_WEIGHT_SHIFT() > Math.random()) {
+                mutate_weight_shift();
+            }
         }
     }
 
@@ -184,7 +206,7 @@ public class Genome {
      */
     public static Genome crossover(Genome g1, Genome g2) {
         Neat neat = g1.getNeat();
-        Genome child = new Genome();
+        Genome child = neat.emptyGenome();
         int i_g1 = 0;
         int i_g2 = 0;
 
@@ -243,7 +265,7 @@ public class Genome {
         }
 
         // Mutate the child
-        child.mutate();
+        child.mutate(1);
 
         return child;
     }
@@ -322,6 +344,27 @@ public class Genome {
                 neat.getC3() * weightDifference;
     }
 
+    /**
+     * Returns a deep copy of itself
+     * @return
+     */
+    public Genome deepCopy() {
+        ArrayList<ConnectionGene> newCons = new ArrayList<>();
+        ArrayList<NodeGene> newNodes = new ArrayList<>();
+
+        // Deep copy the connection genes
+        for (ConnectionGene con : connections) {
+            newCons.add(con.deepCopy());
+        }
+
+        // Deep copy the node genes
+        for (NodeGene node : nodes) {
+            newNodes.add(node.deepCopy());
+        }
+
+        return new Genome(newCons, newNodes, this.neat, this.score);
+    }
+
     public ArrayList<ConnectionGene> getConnections() {
         return connections;
     }
@@ -348,5 +391,18 @@ public class Genome {
 
     public void setCalculator(Calculator calculator) {
         this.calculator = calculator;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return this.score - ((Genome) o).getScore();
     }
 }

@@ -1,7 +1,6 @@
-package pacman.controllers.examples.po.NN.NEAT.Calculations;
+package pacman.controllers.examples.po.NN.NEAT;
 
-import pacman.controllers.examples.RandomNonRevPacMan;
-import pacman.controllers.examples.po.NN.NEAT.NodeGene;
+import pacman.controllers.examples.po.NN.NEAT.Calculations.Connection;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -61,39 +61,39 @@ public class POPacMan extends PacmanController {
         }
 
         // Strategy 3: Go after the pills and power pills that we can see
-        int[] pills = game.getPillIndices();
-        int[] powerPills = game.getPowerPillIndices();
-
-        ArrayList<Integer> targets = new ArrayList<Integer>();
-
-        for (int i = 0; i < pills.length; i++) {
-            //check which pills are available
-            Boolean pillStillAvailable = game.isPillStillAvailable(i);
-            if (pillStillAvailable != null) {
-                if (pillStillAvailable) {
-                    targets.add(pills[i]);
-                }
-            }
-        }
-
-        for (int i = 0; i < powerPills.length; i++) {            //check with power pills are available
-            Boolean pillStillAvailable = game.isPillStillAvailable(i);
-            if (pillStillAvailable != null) {
-                if (pillStillAvailable) {
-                    targets.add(powerPills[i]);
-                }
-            }
-        }
-
-        if (!targets.isEmpty()) {
-            int[] targetsArray = new int[targets.size()];        //convert from ArrayList to array
-
-            for (int i = 0; i < targetsArray.length; i++) {
-                targetsArray[i] = targets.get(i);
-            }
-            //return the next direction once the closest target has been identified
-            return game.getNextMoveTowardsTarget(current, game.getClosestNodeIndexFromNodeIndex(current, targetsArray, DM.PATH), DM.PATH);
-        }
+//        int[] pills = game.getPillIndices();
+//        int[] powerPills = game.getPowerPillIndices();
+//
+//        ArrayList<Integer> targets = new ArrayList<Integer>();
+//
+//        for (int i = 0; i < pills.length; i++) {
+//            //check which pills are available
+//            Boolean pillStillAvailable = game.isPillStillAvailable(i);
+//            if (pillStillAvailable != null) {
+//                if (pillStillAvailable) {
+//                    targets.add(pills[i]);
+//                }
+//            }
+//        }
+//
+//        for (int i = 0; i < powerPills.length; i++) {            //check with power pills are available
+//            Boolean pillStillAvailable = game.isPillStillAvailable(i);
+//            if (pillStillAvailable != null) {
+//                if (pillStillAvailable) {
+//                    targets.add(powerPills[i]);
+//                }
+//            }
+//        }
+//
+//        if (!targets.isEmpty()) {
+//            int[] targetsArray = new int[targets.size()];        //convert from ArrayList to array
+//
+//            for (int i = 0; i < targetsArray.length; i++) {
+//                targetsArray[i] = targets.get(i);
+//            }
+//            //return the next direction once the closest target has been identified
+//            return game.getNextMoveTowardsTarget(current, game.getClosestNodeIndexFromNodeIndex(current, targetsArray, DM.PATH), DM.PATH);
+//        }
 
         // Strategy 4: New PO strategy as now S3 can fail if nothing you can see
         // Going to pick a random action here

@@ -1,6 +1,6 @@
 package pacman.controllers.examples.po.NN.NEAT.Calculations;
 
-import pacman.controllers.examples.po.NN.NEAT.NodeGene;
+import pacman.controllers.examples.po.NN.NEAT.Node;
 
 public class Connection {
 

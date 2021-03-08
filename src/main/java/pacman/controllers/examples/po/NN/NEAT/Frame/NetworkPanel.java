@@ -53,6 +53,7 @@ public class NetworkPanel extends JPanel {
 
     public void setGenome(Genome genome) {
         this.genome = genome;
+        networkNumber++;
     }
 
     public int getNetworkNumber() {
