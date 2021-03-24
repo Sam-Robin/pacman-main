@@ -30,7 +30,7 @@ public class CentralisedNeatTest {
      * @param args Not used
      * @return
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         genomeScores = new HashMap<>();
         Game g = new Game(100, 0, new BasicMessenger(), POType.LOS, 175);
         System.out.println(g.isGamePo());
@@ -40,7 +40,7 @@ public class CentralisedNeatTest {
 
         // Add the network connections to the NEAT object
         Neat neat = new Neat(11, 16, 100);
-        Genome genome = neat.emptyGenome();
+        Genome genome = neat.emptyGenome(0);
         System.out.println(genome.getNodes().size());
 
         NetworkPanel panel = new NetworkPanel(genome);
@@ -121,7 +121,7 @@ public class CentralisedNeatTest {
             // Otherwise...
             else {
                 // Create a new genome
-                genome = neat.emptyGenome();
+                genome = neat.emptyGenome(0);
             }
 //            ghosts = new NNGhosts(genome);
             genome.update();

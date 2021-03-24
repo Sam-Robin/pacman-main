@@ -10,8 +10,8 @@ public class Genome implements Comparable {
     private ArrayList<ConnectionGene> connections;
     private ArrayList<NodeGene> nodes;
     private Neat neat;
+    private double score;
     private Calculator calculator;
-    private int score;
 
     public Genome() {
         connections = new ArrayList<>();
@@ -28,11 +28,10 @@ public class Genome implements Comparable {
     }
 
     public Genome(ArrayList<ConnectionGene> connections, ArrayList<NodeGene> nodes,
-                  Neat neat, int score) {
+                  Neat neat, double score) {
         this.connections = connections;
         this.nodes = nodes;
         this.neat = neat;
-        this.calculator = new Calculator(this);
         this.score = score;
     }
 
@@ -41,24 +40,39 @@ public class Genome implements Comparable {
      * @param other
      */
     public Genome(Genome other) {
-        this(other.getConnections(), other.getNodes(), other.getNeat(),
-                other.getScore());
-    }
+        ArrayList<ConnectionGene> otherCons = new ArrayList<>();
+        ArrayList<NodeGene> otherNodes = new ArrayList<>();
 
-    /**
-     * Runs one set of data through the network
-     * @param data
-     */
-    public double[] calculate(double... data) throws Exception {
-        if (calculator != null) {
-            return calculator.calculate(data);
+        try {
+            for (ConnectionGene con : connections) {
+                otherCons.add(con.deepCopy());
+            }
+        }
+        catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        for (NodeGene node : nodes) {
+            otherNodes.add(node.deepCopy());
         }
 
-        return null;
+        Genome g = new Genome(otherCons, otherNodes, other.getNeat(),
+                other.getScore());
+        this.nodes = otherNodes;
+        this.connections = otherCons;
+        this.neat = other.getNeat();
+        this.score = other.getScore();
     }
 
     public void update() {
         this.calculator = new Calculator(this);
+    }
+
+    public double[] calculate(double... input) throws Exception {
+        if (this.calculator == null) {
+            this.calculator = new Calculator(this);
+        }
+        return this.calculator.calculate(input);
     }
 
     /**
@@ -206,7 +220,7 @@ public class Genome implements Comparable {
      */
     public static Genome crossover(Genome g1, Genome g2) {
         Neat neat = g1.getNeat();
-        Genome child = neat.emptyGenome();
+        Genome child = neat.emptyGenome(0);
         int i_g1 = 0;
         int i_g2 = 0;
 
@@ -389,20 +403,17 @@ public class Genome implements Comparable {
         this.neat = neat;
     }
 
-    public void setCalculator(Calculator calculator) {
-        this.calculator = calculator;
-    }
-
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 
-    public void setScore(int score) {
+    public void setScore(double score) {
         this.score = score;
     }
 
     @Override
     public int compareTo(Object o) {
-        return this.score - ((Genome) o).getScore();
+        double diff = (((Genome) o).getScore() - this.score);
+        return (int)((((Genome) o).getScore() - this.score) * 1000);
     }
 }

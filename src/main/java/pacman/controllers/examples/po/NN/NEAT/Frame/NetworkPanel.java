@@ -50,7 +50,6 @@ public class NetworkPanel extends JPanel {
             g.drawLine(xFrom, yFrom - nodeOffset, xTo, yTo - nodeOffset);
         }
     }
-
     public void setGenome(Genome genome) {
         this.genome = genome;
         networkNumber++;

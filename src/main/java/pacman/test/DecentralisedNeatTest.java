@@ -33,9 +33,9 @@ public class DecentralisedNeatTest {
         experiments = new ArrayList<>();
         Game g = new Game(100, 0, new BasicMessenger(), POType.LOS, 175);
         System.out.println(g.isGamePo());
-        GameView[] ghostViews = createGhostViews(g);
+//        GameView[] ghostViews = createGhostViews(g);
 
-        GameView gView = new GameView(g).showGame();
+//        GameView gView = new GameView(g).showGame();
 
         // Create an initial population
         int populationSize = 20;
@@ -49,8 +49,10 @@ public class DecentralisedNeatTest {
         // Create a PO pacman controller
         PacmanController pacman = new POPacMan();
 
+        Genome bestGenome = population.get(0);
+
         // Run 10 candidate solutions
-        // Create 100 generations
+        // Create 1000 generations
         for (int gen = 0; gen < 100; gen++) {
             // Iterate though every candidate in the population
             for (Genome genome : population) {
@@ -73,11 +75,11 @@ public class DecentralisedNeatTest {
                 // While the game is running...
                 while (!g.gameOver() &&
                 (duration / 100) < maxDuration) {
-                    try {
-                        Thread.sleep(40);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        Thread.sleep(40);
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
 
                     Constants.MOVE pacmanMove =
                             null;
@@ -91,17 +93,17 @@ public class DecentralisedNeatTest {
 
                     g.advanceGame(pacmanMove, ghostMoves);
 
-                    for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
-                        System.out.println(entry.getKey().toString() + " moving " + entry.getValue().toString());
-                    }
+//                    for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
+//                        System.out.println(entry.getKey().toString() + " moving " + entry.getValue().toString());
+//                    }
 
                     // Display every ghost's view
-                    for (GameView view : ghostViews) {
-                        view.paintImmediately(view.getBounds());
-                    }
+//                    for (GameView view : ghostViews) {
+//                        view.paintImmediately(view.getBounds());
+//                    }
 
                     // Update pacman view
-                    gView.paintImmediately(gView.getBounds());
+//                    gView.paintImmediately(gView.getBounds());
 
                     endTime = System.nanoTime();
                     duration = endTime - startTime;
@@ -110,12 +112,12 @@ public class DecentralisedNeatTest {
                 // Now the game is over...
 
                 // Close the previous ghost views
-                for (GameView view : ghostViews) {
-                    view.closeGame();
-                }
+//                for (GameView view : ghostViews) {
+//                    view.closeGame();
+//                }
 
                 // Close the previous pacman view
-                gView.closeGame();
+//                gView.closeGame();
 
                 // Store the genome and its score
                 genomeScores.put(genome, g.getScore());
@@ -146,13 +148,20 @@ public class DecentralisedNeatTest {
                 ghosts.runGhosts(g);
 
                 // Create new ghost views for the current game
-                ghostViews = createGhostViews(g);
-
-                // Create a new pacman view
-                gView = new GameView(g).showGame();
+//                ghostViews = createGhostViews(g);
+//
+//                // Create a new pacman view
+//                gView = new GameView(g).showGame();
             }
 
             // Now that the population has been evaluated...
+
+            // Set the best genome so far
+            for (Genome genome : population) {
+                if (genome.getScore() < bestGenome.getScore()) {
+                    bestGenome = genome;
+                }
+            }
 
             // Save the population to a csv file
             try {
@@ -175,27 +184,64 @@ public class DecentralisedNeatTest {
         }
 
         // Now all the experiments are done...
+
+        // Show off the best genome
+        playViewableGame(bestGenome, g, networkFrame);
+    }
+
+    private static void playViewableGame(Genome genome, Game g, NetworkFrame frame) {
+        GameView[] ghostViews = createGhostViews(g);
+        GameView pacmanView = new GameView(g).showGame();
+        POPacMan pacman = new POPacMan();
+        NNGhosts ghosts = new NNGhosts(genome);
+
+        frame.getPanel().setGenome(genome);
+        frame.update();
+
+
+        while (!g.gameOver()) {
+            Constants.MOVE pacmanMove =
+                    null;
+            try {
+                pacmanMove = pacman.getMove(g.copy(5), 40);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            EnumMap<Constants.GHOST, Constants.MOVE> ghostMoves =
+                    ghosts.getMove(g.copy(), -1);
+
+            g.advanceGame(pacmanMove, ghostMoves);
+
+            for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
+                System.out.println(entry.getKey().toString() + " moving " + entry.getValue().toString());
+            }
+
+            //Display every ghost's view
+            for (GameView view : ghostViews) {
+                view.paintImmediately(view.getBounds());
+            }
+
+            //Update pacman view
+            pacmanView.paintImmediately(pacmanView.getBounds());
+        }
     }
 
     private static ArrayList<Genome> createInitialPopulation(Neat neat, int size) {
         ArrayList<Genome> population = new ArrayList<>(size);
 
-        Genome first = neat.emptyGenome();
-        population.add(first);
+        int numGenomes = 5;
 
-        for (int i = 0; i < (size / 2) - 1; i++) {
-            Genome next = first.deepCopy();
-            next.mutate(10);
-            population.add(next);
-        }
+        for (int x = 0; x < numGenomes; x++) {
+            // Create a base genome
+            Genome baseGenome = neat.emptyGenome(0);
+            population.add(baseGenome);
 
-        Genome second = neat.emptyGenome();
-        population.add(second);
-
-        for (int i = 0; i < (size / 2) - 1; i++) {
-            Genome next = second.deepCopy();
-            next.mutate(10);
-            population.add(next);
+            // Create mutations of the base genome
+            for (int i = 0; i < (size / numGenomes) - 1; i++) {
+                Genome next = baseGenome.deepCopy();
+                next.mutate(100);
+                population.add(next);
+            }
         }
 
         return population;

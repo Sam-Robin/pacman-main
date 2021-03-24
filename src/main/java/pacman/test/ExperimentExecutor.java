@@ -38,9 +38,9 @@ public class ExperimentExecutor {
         //GameView gView = new GameView(g).showGame();
         PacmanController pacman = new POPacMan();
         Neat neat = new Neat(5, 4, 100);
-        Genome genome = neat.emptyGenome();
+        Genome genome = neat.emptyGenome(60);
         NNGhosts ghosts = new NNGhosts(genome);
-        genome.update();
+        //genome.update();
         ghosts.runGhosts(g);
 
         // Setup list of experiments
@@ -81,10 +81,10 @@ public class ExperimentExecutor {
             // Create a new game once the previous one has finished
             g = new Game(1000, 0, new BasicMessenger(), POType.LOS, 175);
             // Create a new genome
-            genome = neat.emptyGenome();
+            genome = neat.emptyGenome(0);
             // Create a new set of NNGhosts
             ghosts = new NNGhosts(genome);
-            genome.update();
+            //genome.update();
             ghosts.runGhosts(g);
 
             System.out.println("Experiment " + (i + 1) + " complete");
@@ -93,7 +93,7 @@ public class ExperimentExecutor {
         // Set the calculators in the genomes to null to avoid circular references
         for (ExperimentData experimentData : experiments) {
             Genome gen = experimentData.getGenome();
-            gen.setCalculator(null);
+            //gen.setCalculator(null);
         }
 
         // Save the genomes to a file

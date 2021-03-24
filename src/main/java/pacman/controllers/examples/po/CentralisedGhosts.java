@@ -22,7 +22,7 @@ public class CentralisedGhosts extends CentralisedGhostController {
         controllers.put(Constants.GHOST.PINKY, new CentralisedGhost(Constants.GHOST.PINKY, genome));
         controllers.put(Constants.GHOST.SUE, new CentralisedGhost(Constants.GHOST.SUE, genome));
         this.genome = genome;
-        this.inputs = new double[11];
+        this.inputs = new double[9];
         this.pacmanLastSeen = -1;
     }
 
@@ -49,10 +49,6 @@ public class CentralisedGhosts extends CentralisedGhostController {
             i++;
         }
 
-        // Get pacman's score
-        int score = game.getScore();
-        int time = game.getTotalTime();
-
         // Iterate through the arrays of data
         for (i = 0; i < inputs.length; i++) {
             // Add the ghost locations
@@ -70,8 +66,6 @@ public class CentralisedGhosts extends CentralisedGhostController {
         }
         // Add pacman's last known location
         inputs[8] = pacmanLastSeen;
-        inputs[9] = score;          // Add the score
-        inputs[10] = time;          // Add the time
     }
 
     @Override

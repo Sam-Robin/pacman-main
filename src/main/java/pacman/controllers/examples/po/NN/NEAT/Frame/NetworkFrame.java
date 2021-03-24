@@ -48,4 +48,8 @@ public class NetworkFrame extends JFrame {
     public void putTitle(String title) {
         setTitle(title);
     }
+
+    public NetworkPanel getPanel() {
+        return networkPanel;
+    }
 }

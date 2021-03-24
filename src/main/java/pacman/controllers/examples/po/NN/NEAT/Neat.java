@@ -3,6 +3,7 @@ package pacman.controllers.examples.po.NN.NEAT;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Class used to perform NEAT on neural networks
@@ -18,21 +19,29 @@ public class Neat {
     private int outputSize;
     private int maxClients;
     private double C1 = 1, C2 = 1, C3 = 1;
-    private double WEIGHT_SHIFT_STRENGTH = 0.3, WEIGHT_RANDOM_STRENGTH = 1;
+    private double CP = 4;
+    private double WEIGHT_SHIFT_STRENGTH = 0.1, WEIGHT_RANDOM_STRENGTH = 0.5;
     private double PROBABILITY_MUTATE_LINK = 0.2;
-    private double PROBABILITY_MUTATE_NODE = 0.1;
+    private double PROBABILITY_MUTATE_NODE = 0.2;
     private double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.1;
     private double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.1;
     private double PROBABILITY_MUTATE_TOGGLE_LINK = 0.1;
+    private double survivors = 0.8;
+    private ArrayList<Client> clients;
+    private ArrayList<Species> species;
 
     public Neat() {
         connections = new HashMap<>();
         nodes = new ArrayList<>();
+        clients = new ArrayList<>();
+        species = new ArrayList<>();
     }
 
     public Neat(int inputSize, int outputSize, int maxClients) {
         connections = new HashMap<>();
         nodes = new ArrayList<>();
+        clients = new ArrayList<>();
+        species = new ArrayList<>();
         this.reset(inputSize, outputSize, maxClients);
     }
 
@@ -40,7 +49,7 @@ public class Neat {
      * Creates a genome with nodes and connections
      * @return
      */
-    public Genome emptyGenome() {
+    public Genome emptyGenome(int mutateCount) {
         Genome g = new Genome(this);
 
         // Create all the nodes
@@ -73,7 +82,7 @@ public class Neat {
 
         g.getConnections().addAll(connections);
 
-        g.mutate(20);
+        g.mutate(mutateCount);
 
         return g;
     }
@@ -85,6 +94,7 @@ public class Neat {
 
         connections.clear();
         nodes.clear();
+        this.clients.clear();
 
         for (int i = 0; i < inputSize; i++) {
             NodeGene n = getNode();
@@ -98,6 +108,97 @@ public class Neat {
             n.setY((i + 1) / (inputSize + 0.1));
         }
 
+        for (int i = 0; i < maxClients; i++) {
+            Client c = new Client();
+            c.setGenome(emptyGenome(0));
+            c.generateCalculator();
+            this.clients.add(c);
+        }
+    }
+
+    public void evolve() {
+        generateSpecies();
+
+        printSpecies();
+
+        kill();
+        //removeExtinctSpecies();
+        reproduce();
+        mutate();
+
+        for (Client c : clients) {
+            c.generateCalculator();
+        }
+    }
+
+    public void printSpecies() {
+        System.out.println("############");
+        for (Species s : species) {
+            System.out.println(s + " " + s.getScore() + " " + s.size());
+        }
+    }
+
+    private void mutate() {
+        for (Client c : clients) {
+            c.mutate();
+        }
+    }
+
+    private void reproduce() {
+        Random random = new Random();
+
+        for (Client c : clients) {
+            if (c.getSpecies() == null) {
+                Species s = species.get(random.nextInt(species.size()));
+                c.setGenome(s.breed());
+                s.forcePut(c);
+            }
+        }
+    }
+
+    private void removeExtinctSpecies() {
+        for (int i = species.size() - 1; i >= 0; i--) {
+            if(species.get(i).size() <= 1) {
+                species.get(i).goExtinct();
+                species.remove(i);
+            }
+        }
+    }
+
+    private void kill() {
+        for (Species s : species) {
+            s.kill(1 - survivors);
+        }
+    }
+
+    private void generateSpecies() {
+        for (Species s : species) {
+            s.reset();
+        }
+
+        for (Client c : clients) {
+            if (c.getSpecies() != null) {
+                continue;
+            }
+            boolean found = false;
+            for (Species s : species) {
+                if (s.put(c)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                species.add(new Species(c));
+            }
+        }
+
+        for (Species s : species) {
+            s.evaluateScore();
+        }
+    }
+
+    public Client getClient(int index) {
+        return clients.get(index);
     }
 
     /**
@@ -247,5 +348,17 @@ public class Neat {
 
     public int getOutputSize() {
         return outputSize;
+    }
+
+    public double getCP() {
+        return CP;
+    }
+
+    public void setCP(double CP) {
+        this.CP = CP;
+    }
+
+    public ArrayList<Client> getClients() {
+        return clients;
     }
 }

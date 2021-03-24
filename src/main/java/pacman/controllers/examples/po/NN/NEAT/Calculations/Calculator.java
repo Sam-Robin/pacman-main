@@ -13,6 +13,7 @@ public class Calculator {
 
     private ArrayList<Node> inputNodes, hiddenNodes, outputNodes;
     private Genome genome;
+    private double[] output;
 
     public Calculator(Genome genome) {
         this.genome = genome;
@@ -77,7 +78,7 @@ public class Calculator {
             node.calculate();
         }
 
-        double[] output = new double[outputNodes.size()];
+        output = new double[outputNodes.size()];
         for (int i = 0; i < outputNodes.size(); i++) {
             outputNodes.get(i).calculate();
             output[i] = outputNodes.get(i).getOutput();
@@ -85,6 +86,10 @@ public class Calculator {
 
         //System.out.println(Arrays.toString(output));
 
+        return output;
+    }
+
+    public double[] getOutput() {
         return output;
     }
 }

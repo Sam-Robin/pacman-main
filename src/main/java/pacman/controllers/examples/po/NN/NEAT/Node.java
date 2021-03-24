@@ -18,8 +18,8 @@ public class Node implements Comparable {
         this.output = 0;
 
         Random random = new Random();
-        int min = -50;
-        int max = 50;
+        int min = -10;
+        int max = 10;
         this.bias = random.nextInt(max - min) + min;
     }
 
@@ -29,8 +29,8 @@ public class Node implements Comparable {
         this.output = 0;
 
         Random random = new Random();
-        int min = -50;
-        int max = 50;
+        int min = -10;
+        int max = 10;
         this.bias = random.nextInt(max - min) + min;
     }
 
