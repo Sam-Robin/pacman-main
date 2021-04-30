@@ -1,7 +1,11 @@
 package pacman.controllers.examples.po.NN.NEAT;
 
 import pacman.controllers.examples.po.NN.NEAT.Calculations.Calculator;
+import pacman.controllers.examples.po.NN.NEAT.Calculations.Connection;
 
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -12,6 +16,8 @@ public class Genome implements Comparable {
     private Neat neat;
     private double score;
     private Calculator calculator;
+    private double inputLayerSprawl;
+    private double hiddenLayerSprawl;
 
     public Genome() {
         connections = new ArrayList<>();
@@ -73,6 +79,307 @@ public class Genome implements Comparable {
             this.calculator = new Calculator(this);
         }
         return this.calculator.calculate(input);
+    }
+
+    private BigDecimal calculateReachOfNode(NodeGene node) {
+        ArrayList<ConnectionGene> cons = new ArrayList<>();
+        double sum = 0.0;
+
+        // Get all connections where this node is the fromNode
+        for (ConnectionGene connection : connections) {
+            if (connection.getFromNode() == node && connection.isEnabled()) {
+                cons.add(connection);
+            }
+        }
+
+        // Iterate through all the connections
+        for (ConnectionGene connection : cons) {
+            // Get the positions of the nodes
+            double Ax = connection.getFromNode().getX();
+            double Ay = connection.getFromNode().getY();
+            double Bx = connection.getToNode().getX();
+            double By = connection.getToNode().getY();
+
+            // Calculate length of connection using pythagoras
+            double hyp = Math.sqrt(Math.pow(Bx - Ax, 2) + Math.pow(By - Ay, 2));
+            sum += hyp;
+        }
+
+        return new BigDecimal(sum);
+    }
+
+    public BigDecimal calculateInputLayerReach() {
+        ArrayList<NodeGene> inputNodes = findInputNodes();
+        double sum = 0.0;
+
+        for (NodeGene node : inputNodes) {
+            sum += calculateReachOfNode(node).doubleValue();
+        }
+
+        return new BigDecimal(sum);
+    }
+
+    public BigDecimal calculateHiddenLayerReach() {
+        ArrayList<NodeGene> hiddenNodes = findHiddenNodes();
+        double sum = 0.0;
+
+        for (NodeGene node : hiddenNodes) {
+            sum += calculateReachOfNode(node).doubleValue();
+        }
+
+        return new BigDecimal(sum);
+    }
+
+    /**
+     * Calculate the sprawl between 3 nodes
+     * @param n1
+     * @param n2
+     * @param n3
+     */
+    public BigDecimal calculateSprawlOfNodes(NodeGene n1, NodeGene n2, NodeGene n3) {
+        boolean AB_found = false;
+        boolean AC_found = false;
+        // Check there is a connection between n1 and n2
+        for (ConnectionGene connection : connections) {
+            if (connection.getFromNode() == n1 && connection.getToNode() == n2) {
+                AB_found = true;
+            }
+        }
+
+        // Check there is a connection between n1 and n3
+        for (ConnectionGene connection : connections) {
+            if (connection.getFromNode() == n1 && connection.getToNode() == n3) {
+                AC_found = true;
+            }
+        }
+
+        if (!AB_found || !AC_found) {
+            return new BigDecimal(-1);
+        }
+
+        MathContext mc = new MathContext(16);
+
+        // Get distance between n1 and n2
+        double AB_xDiff = n1.getX() - n2.getX();
+        double AB_yDiff = n1.getY() - n2.getY();
+        double AB_distance = Math.sqrt(Math.pow(AB_xDiff, 2) + Math.pow(AB_yDiff, 2));
+
+        // Get distance between n1 and n3
+        double AC_xDiff = n1.getX() - n3.getX();
+        double AC_yDiff = n1.getY() - n3.getY();
+        double AC_distance = Math.sqrt(Math.pow(AC_xDiff, 2) + Math.pow(AC_yDiff, 2));
+
+        // Get distance between n2 and n3
+        double BC_xDiff = n2.getX() - n3.getX();
+        double BC_yDiff = n2.getY() - n3.getY();
+        double BC_distance = Math.sqrt(Math.pow(BC_xDiff, 2) + Math.pow(BC_yDiff, 2));
+
+        // Calculate angle
+        double numerator = Math.pow(AB_distance, 2) + Math.pow(AC_distance, 2) - Math.pow(BC_distance, 2);
+        double denominator = 2 * AB_distance * AC_distance;
+        double angle = Math.acos(numerator / denominator);
+
+        return new BigDecimal(angle, mc);
+    }
+
+    public ArrayList<NodeGene> findInputNodes() {
+        double inputLayerX = 1.0;
+
+        // Find where the input layer is located on the x axis
+        for (NodeGene node : nodes) {
+            if (node.getX() < inputLayerX) {
+                inputLayerX = node.getX();
+            }
+        }
+
+        // Get the input nodes
+        ArrayList<NodeGene> inputNodes = new ArrayList<>();
+        for (NodeGene node: nodes) {
+            if (node.getX() <= inputLayerX) {
+                inputNodes.add(node);
+            }
+        }
+
+        return inputNodes;
+    }
+
+    private ArrayList<NodeGene> findOutputNodes() {
+        double outputLayerX = 0.0;
+
+        // Find where the output layer is located on the x axis
+        for (NodeGene node : nodes) {
+            if (node.getX() > outputLayerX) {
+                outputLayerX = node.getX();
+            }
+        }
+
+        // Get the output nodes
+        ArrayList<NodeGene> outputNodes = new ArrayList<>();
+        for (NodeGene node : nodes) {
+            if (node.getX() >= outputLayerX) {
+                outputNodes.add(node);
+            }
+        }
+
+        return outputNodes;
+    }
+
+    public ArrayList<NodeGene> findHiddenNodes() {
+        ArrayList<NodeGene> hiddenNodes = new ArrayList<>(nodes);
+        hiddenNodes.removeAll(findInputNodes());
+        hiddenNodes.removeAll(findOutputNodes());
+
+        return hiddenNodes;
+    }
+
+    /**
+     * Calculates the average sprawl of the input layer
+     * @return
+     */
+    public BigDecimal calculateInputLayerSprawl() {
+        double sprawl = 0.0;
+        double inputLayerX = 1.0;
+
+        // Find where the input layer is located on the x axis
+        for (NodeGene node : nodes) {
+            if (node.getX() < inputLayerX) {
+                inputLayerX = node.getX();
+            }
+        }
+
+        // Get the input nodes
+        ArrayList<NodeGene> inputNodes = findInputNodes();
+
+        // Iterate through all input nodes
+        for (NodeGene node : inputNodes) {
+            // Get the node's enabled connections
+            ArrayList<ConnectionGene> cons = new ArrayList<>();
+            for (ConnectionGene connection : connections) {
+                if (connection.getFromNode() == node && connection.isEnabled()) {
+                    cons.add(connection);
+                }
+            }
+
+            // If there is more than one connection...
+            if (cons.size() > 1) {
+                // Get the B node
+                NodeGene bNode = new NodeGene(0, 0.0, 0.0);
+                for (ConnectionGene connection : cons) {
+                    if (connection.getToNode().getY() > bNode.getY()) {
+                        bNode = connection.getToNode();
+                    }
+                }
+
+                // Get the C node
+                NodeGene cNode = new NodeGene(0, 0.0, 1.0);
+                for (ConnectionGene connection : cons) {
+                    if (connection.getToNode().getY() < cNode.getY()) {
+                        cNode = connection.getToNode();
+                    }
+                }
+
+                // Get the sprawl between the 3 nodes
+                sprawl += calculateSprawlOfNodes(node, bNode, cNode).doubleValue();
+            }
+        }
+
+        return new BigDecimal(sprawl, new MathContext(16));
+    }
+
+    /**
+     * Calculates the average sprawl of the hidden layer
+     * @return
+     */
+    public BigDecimal calculateHiddenLayerSprawl() {
+        double sprawl = 0.0;
+
+        // All the hidden nodes are the subset without input and output nodes, so...
+        ArrayList<NodeGene> hiddenNodes = findHiddenNodes();
+
+        // Iterate through all hidden nodes
+        for (NodeGene node : hiddenNodes) {
+            // Get the node's connections
+            ArrayList<ConnectionGene> cons = new ArrayList<>();
+            for (ConnectionGene connection : connections) {
+                if (connection.getFromNode() == node && connection.isEnabled()) {
+                    cons.add(connection);
+                }
+            }
+
+            // If there is more than one connection...
+            if (cons.size() > 1) {
+                // Get the B node (highest node on Y axis)
+                NodeGene bNode = new NodeGene(0, 0.0, 0.0);
+                for (ConnectionGene connection : cons) {
+                    if (connection.getToNode().getY() > bNode.getY()) {
+                        bNode = connection.getToNode();
+                    }
+                }
+
+                // Get the C node (lowest node on Y axis)
+                NodeGene cNode = new NodeGene(0, 0.0, 1.0);
+                for (ConnectionGene connection : cons) {
+                    if (connection.getToNode().getY() < cNode.getY()) {
+                        cNode = connection.getToNode();
+                    }
+                }
+
+                // Get the sprawl between the 3 nodes
+                sprawl += calculateSprawlOfNodes(node, bNode, cNode).doubleValue();
+            }
+        }
+
+        return new BigDecimal(sprawl, new MathContext(16));
+    }
+
+    public ArrayList<ConnectionGene> findEnabledConnections() {
+        ArrayList<ConnectionGene> cons = new ArrayList<>();
+        for (ConnectionGene connection : connections) {
+            if (connection.isEnabled()) {
+                cons.add(connection);
+            }
+        }
+        return cons;
+    }
+
+    public double calculateInputVectorSum() {
+        double sum = 0.0;
+        ArrayList<NodeGene> inputNodes = findInputNodes();
+        ArrayList<ConnectionGene> inputConnections = new ArrayList<>();
+
+        for (NodeGene node : inputNodes) {
+            for (ConnectionGene con : connections) {
+                if (con.getFromNode() == node && con.isEnabled()) {
+                    inputConnections.add(con);
+                }
+            }
+        }
+
+        for (ConnectionGene con : inputConnections) {
+            sum += con.getWeight();
+        }
+
+        return sum;
+    }
+
+    public double calculateHiddenVectorSum() {
+        double sum = 0.0;
+        ArrayList<NodeGene> hiddenNodes = findHiddenNodes();
+        ArrayList<ConnectionGene> hiddenConnections = new ArrayList<>();
+
+        for (NodeGene node : hiddenNodes) {
+            for (ConnectionGene con : connections) {
+                if (con.getFromNode() == node && con.isEnabled()) {
+                    hiddenConnections.add(con);
+                }
+            }
+        }
+
+        for (ConnectionGene con : hiddenConnections) {
+            sum += con.getWeight();
+        }
+
+        return sum;
     }
 
     /**
@@ -263,6 +570,17 @@ public class Genome implements Comparable {
 
             i_g1++;
         }
+
+        // Remove any duplicates
+        ArrayList<ConnectionGene> newList = new ArrayList<>();
+
+        for (ConnectionGene con : child.getConnections()) {
+            if (!newList.contains(con)) {
+                newList.add(neat.getConnection(con));
+            }
+        }
+
+        child.setConnections(newList);
 
         for (ConnectionGene c : child.getConnections()) {
             NodeGene fromNode = c.getFromNode();

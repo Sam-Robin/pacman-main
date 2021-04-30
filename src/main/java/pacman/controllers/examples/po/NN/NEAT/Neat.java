@@ -21,11 +21,11 @@ public class Neat {
     private double C1 = 1, C2 = 1, C3 = 1;
     private double CP = 4;
     private double WEIGHT_SHIFT_STRENGTH = 0.1, WEIGHT_RANDOM_STRENGTH = 0.5;
-    private double PROBABILITY_MUTATE_LINK = 0.2;
-    private double PROBABILITY_MUTATE_NODE = 0.2;
-    private double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.1;
-    private double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.1;
-    private double PROBABILITY_MUTATE_TOGGLE_LINK = 0.1;
+    private double PROBABILITY_MUTATE_LINK = 0.001;
+    private double PROBABILITY_MUTATE_NODE = 0.001;
+    private double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.005;
+    private double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.005;
+    private double PROBABILITY_MUTATE_TOGGLE_LINK = 0.005;
     private double survivors = 0.8;
     private ArrayList<Client> clients;
     private ArrayList<Species> species;

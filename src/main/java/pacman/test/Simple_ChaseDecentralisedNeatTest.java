@@ -6,6 +6,7 @@ import pacman.controllers.examples.po.NN.NEAT.Frame.NetworkFrame;
 import pacman.controllers.examples.po.NN.NEAT.Frame.NetworkPanel;
 import pacman.controllers.examples.po.NN.NEAT.Genome;
 import pacman.controllers.examples.po.NN.NEAT.Neat;
+import pacman.controllers.examples.po.NNGhost;
 import pacman.controllers.examples.po.NNGhosts;
 import pacman.controllers.examples.po.POPacMan;
 import pacman.game.Constants;
@@ -13,19 +14,18 @@ import pacman.game.Game;
 import pacman.game.GameView;
 import pacman.game.comms.BasicMessenger;
 import pacman.game.internal.POType;
+import pacman.game.util.Serializer;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * A 1+1 genetic algorithm for playing Ms. Pacman centralised.
- */
-public class Simple_ExploreCentralisedNeatTest {
+public class Simple_ChaseDecentralisedNeatTest {
 
     private enum EXPERIMENT_TYPE {
         LEFT_WALL,
@@ -37,8 +37,8 @@ public class Simple_ExploreCentralisedNeatTest {
     }
 
     public static void main(String[] args) throws Exception {
-        Neat neat = new Neat(9, 16, 1);
-        Genome genome = neat.emptyGenome(500);
+        Neat neat = new Neat(4, 4, 100);
+        Genome genome = neat.emptyGenome(50);
         genome.update();
         Genome bestGenome = genome;
         ArrayList<Integer> nodesVisited = new ArrayList<>();
@@ -57,16 +57,15 @@ public class Simple_ExploreCentralisedNeatTest {
             population.add(neat.emptyGenome(50));
         }
 
-
         for (int i = 0; i < 1000; i++) {
             for (Genome g1 : population) {
-                CentralisedGhosts ghosts = new CentralisedGhosts(g1);
+                NNGhosts ghosts = new NNGhosts(genome);
                 g1.update();
                 panel.setGenome(g1);
                 frame.update();
 
                 // Evaluate a genome over 30 games
-                ArrayList<Integer> scores = new ArrayList<>(30);
+                ArrayList<Double> scores = new ArrayList<>(30);
                 for (int n = 0; n < 30; n++) {
                     g = new Game(100, 0, new BasicMessenger(), POType.LOS, 175);
                     scores.add(playNonViewableGame(g1, g, frame));
@@ -74,10 +73,9 @@ public class Simple_ExploreCentralisedNeatTest {
 
                 // Take the average of all scores
                 int sum = 0;
-                for (Integer score : scores) {
+                for (Double score : scores) {
                     sum += score;
                 }
-
 
                 g1.setScore(sum / 30);
 
@@ -90,15 +88,16 @@ public class Simple_ExploreCentralisedNeatTest {
 
                 // Save the experiment to a file
                 try {
-                    writeExperimentToCSV((int) g1.getScore(), i,
+                    writeExperimentToCSV(g1.getScore(), i,
                             g1.findInputNodes().size(), g1.findHiddenNodes().size(),
                             g1.calculateInputVectorSum(), g1.calculateHiddenVectorSum(),
                             g1.calculateInputLayerSprawl(), g1.calculateHiddenLayerSprawl(),
                             g1.calculateInputLayerReach(), g1.calculateHiddenLayerReach(),
-                            "centralised_explore_vs.csv");
+                            "decentralised_chase_vs_fake.csv");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
             }
 
             Collections.sort(population);
@@ -107,7 +106,7 @@ public class Simple_ExploreCentralisedNeatTest {
                 g1.mutate(1);
             }
 
-            //crossoverPopulation(population, 10);
+            //population = crossoverPopulation(population, 10);
         }
 
         // Now all the experiments are done...
@@ -116,6 +115,15 @@ public class Simple_ExploreCentralisedNeatTest {
 
         // Show off the best genome
         playViewableGame(bestGenome, g, frame);
+
+        // Save the bestGenome
+        Serializer serializer = new Serializer();
+        String json = serializer.serialize(bestGenome);
+
+        // Write the json to a file
+        CSVWriter writer = new CSVWriter(new FileWriter("chase_decentralised_best_genome.txt"));
+
+        writer.writeNext(new String[] { json });
     }
 
     private static ArrayList<Genome> crossoverPopulation(ArrayList<Genome> population, int size) {
@@ -145,10 +153,32 @@ public class Simple_ExploreCentralisedNeatTest {
         return newPopulation;
     }
 
-    private static int playNonViewableGame(Genome genome, Game g, NetworkFrame frame) {
+    private static void writeExperimentToCSV(double score,
+                                             int generation,
+                                             int inputNodes,
+                                             int hiddenNodes,
+                                             double inputWeightSum,
+                                             double hiddenWeightSum,
+                                             BigDecimal inputSprawl,
+                                             BigDecimal hiddenSprawl,
+                                             BigDecimal inputReach,
+                                             BigDecimal hiddenReach, String name) throws IOException {
+        CSVWriter writer = new CSVWriter(new FileWriter(name, true));
+
+        writer.writeNext(new String[] {
+                String.valueOf(generation), String.valueOf(score),
+                String.valueOf(inputNodes), String.valueOf(hiddenNodes),
+                String.valueOf(inputWeightSum), String.valueOf(hiddenWeightSum),
+                inputSprawl.toString(), hiddenSprawl.toString(),
+                inputReach.toString(), hiddenReach.toString()});
+
+        writer.close();
+    }
+
+    private static double playNonViewableGame(Genome genome, Game g, NetworkFrame frame) {
         POPacMan pacman = new POPacMan();
-        CentralisedGhosts ghosts = new CentralisedGhosts(genome);
-        ArrayList<Integer> nodesVisited = new ArrayList<>();
+        NNGhosts ghosts = new NNGhosts(genome);
+        ArrayList<Double> distances = new ArrayList<>();
 
         frame.update();
 
@@ -160,21 +190,29 @@ public class Simple_ExploreCentralisedNeatTest {
 
             // Add the unique nodes visited to the nodesVisited ArrayList
             for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
-                int index = g.getGhostCurrentNodeIndex(entry.getKey());
-                if (!nodesVisited.contains(index)) {
-                    nodesVisited.add(index);
-                }
+                int ghostIndex = g.getGhostCurrentNodeIndex(entry.getKey());
+                int pacmanIndex = g.getPacmanCurrentNodeIndex();
+                double distance = g.getEuclideanDistance(ghostIndex, pacmanIndex);
+                distances.add(distance);
             }
         }
 
-        return nodesVisited.size();
+        double sum = 0;
+
+        for (Double d : distances) {
+            sum += d;
+        }
+
+        sum = sum / distances.size();
+
+        return sum;
     }
 
     private static void playViewableGame(Genome genome, Game g, NetworkFrame frame) {
         GameView[] ghostViews = createGhostViews(g);
         GameView pacmanView = new GameView(g).showGame();
         POPacMan pacman = new POPacMan();
-        CentralisedGhosts ghosts = new CentralisedGhosts(genome);
+        NNGhosts ghosts = new NNGhosts(genome);
 
         frame.getPanel().setGenome(genome);
         frame.update();
@@ -183,8 +221,10 @@ public class Simple_ExploreCentralisedNeatTest {
         while (!g.gameOver()) {
             Constants.MOVE pacmanMove =
                     null;
+
             try {
                 pacmanMove = pacman.getMove(g.copy(5), 40);
+                Thread.sleep(40);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -223,29 +263,6 @@ public class Simple_ExploreCentralisedNeatTest {
 
         return views;
     }
-
-    private static void writeExperimentToCSV(int score,
-                                             int generation,
-                                             int inputNodes,
-                                             int hiddenNodes,
-                                             double inputWeightSum,
-                                             double hiddenWeightSum,
-                                             BigDecimal inputSprawl,
-                                             BigDecimal hiddenSprawl,
-                                             BigDecimal inputReach,
-                                             BigDecimal hiddenReach, String name) throws IOException {
-        CSVWriter writer = new CSVWriter(new FileWriter(name, true));
-
-        writer.writeNext(new String[] {
-                String.valueOf(generation), String.valueOf(score),
-                String.valueOf(inputNodes), String.valueOf(hiddenNodes),
-                String.valueOf(inputWeightSum), String.valueOf(hiddenWeightSum),
-                inputSprawl.toString(), hiddenSprawl.toString(),
-                inputReach.toString(), hiddenReach.toString()});
-
-        writer.close();
-    }
-
 
     private static double costFunction(EXPERIMENT_TYPE type, ArrayList<Integer> nodesVisited) {
         if (type == EXPERIMENT_TYPE.EXPLORE) {

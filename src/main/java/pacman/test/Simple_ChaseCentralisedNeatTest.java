@@ -13,6 +13,7 @@ import pacman.game.Game;
 import pacman.game.GameView;
 import pacman.game.comms.BasicMessenger;
 import pacman.game.internal.POType;
+import pacman.game.util.Serializer;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,7 +26,7 @@ import java.util.Map;
 /**
  * A 1+1 genetic algorithm for playing Ms. Pacman centralised.
  */
-public class Simple_ExploreCentralisedNeatTest {
+public class Simple_ChaseCentralisedNeatTest {
 
     private enum EXPERIMENT_TYPE {
         LEFT_WALL,
@@ -66,7 +67,7 @@ public class Simple_ExploreCentralisedNeatTest {
                 frame.update();
 
                 // Evaluate a genome over 30 games
-                ArrayList<Integer> scores = new ArrayList<>(30);
+                ArrayList<Double> scores = new ArrayList<>(30);
                 for (int n = 0; n < 30; n++) {
                     g = new Game(100, 0, new BasicMessenger(), POType.LOS, 175);
                     scores.add(playNonViewableGame(g1, g, frame));
@@ -74,7 +75,7 @@ public class Simple_ExploreCentralisedNeatTest {
 
                 // Take the average of all scores
                 int sum = 0;
-                for (Integer score : scores) {
+                for (Double score : scores) {
                     sum += score;
                 }
 
@@ -90,12 +91,12 @@ public class Simple_ExploreCentralisedNeatTest {
 
                 // Save the experiment to a file
                 try {
-                    writeExperimentToCSV((int) g1.getScore(), i,
+                    writeExperimentToCSV(g1.getScore(), i,
                             g1.findInputNodes().size(), g1.findHiddenNodes().size(),
                             g1.calculateInputVectorSum(), g1.calculateHiddenVectorSum(),
                             g1.calculateInputLayerSprawl(), g1.calculateHiddenLayerSprawl(),
                             g1.calculateInputLayerReach(), g1.calculateHiddenLayerReach(),
-                            "centralised_explore_vs.csv");
+                            "centralised_chase_vs_FAKE.csv");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -116,6 +117,15 @@ public class Simple_ExploreCentralisedNeatTest {
 
         // Show off the best genome
         playViewableGame(bestGenome, g, frame);
+
+        // Save the bestGenome
+        Serializer serializer = new Serializer();
+        String json = serializer.serialize(bestGenome);
+
+        // Write the json to a file
+        CSVWriter writer = new CSVWriter(new FileWriter("chase_centralised_best_genome"));
+
+        writer.writeNext(new String[] { json });
     }
 
     private static ArrayList<Genome> crossoverPopulation(ArrayList<Genome> population, int size) {
@@ -145,10 +155,10 @@ public class Simple_ExploreCentralisedNeatTest {
         return newPopulation;
     }
 
-    private static int playNonViewableGame(Genome genome, Game g, NetworkFrame frame) {
+    private static double playNonViewableGame(Genome genome, Game g, NetworkFrame frame) {
         POPacMan pacman = new POPacMan();
         CentralisedGhosts ghosts = new CentralisedGhosts(genome);
-        ArrayList<Integer> nodesVisited = new ArrayList<>();
+        ArrayList<Double> distances = new ArrayList<>();
 
         frame.update();
 
@@ -160,14 +170,22 @@ public class Simple_ExploreCentralisedNeatTest {
 
             // Add the unique nodes visited to the nodesVisited ArrayList
             for (Map.Entry<Constants.GHOST, Constants.MOVE> entry : ghostMoves.entrySet()) {
-                int index = g.getGhostCurrentNodeIndex(entry.getKey());
-                if (!nodesVisited.contains(index)) {
-                    nodesVisited.add(index);
-                }
+                int ghostIndex = g.getGhostCurrentNodeIndex(entry.getKey());
+                int pacmanIndex = g.getPacmanCurrentNodeIndex();
+                double distance = g.getEuclideanDistance(ghostIndex, pacmanIndex);
+                distances.add(distance);
             }
         }
 
-        return nodesVisited.size();
+        double sum = 0;
+
+        for (Double d : distances) {
+            sum += d;
+        }
+
+        sum = sum / distances.size();
+
+        return sum;
     }
 
     private static void playViewableGame(Genome genome, Game g, NetworkFrame frame) {
@@ -185,6 +203,7 @@ public class Simple_ExploreCentralisedNeatTest {
                     null;
             try {
                 pacmanMove = pacman.getMove(g.copy(5), 40);
+                Thread.sleep(400);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -224,7 +243,7 @@ public class Simple_ExploreCentralisedNeatTest {
         return views;
     }
 
-    private static void writeExperimentToCSV(int score,
+    private static void writeExperimentToCSV(double score,
                                              int generation,
                                              int inputNodes,
                                              int hiddenNodes,
